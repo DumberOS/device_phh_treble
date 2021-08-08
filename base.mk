@@ -18,7 +18,13 @@ PRODUCT_COPY_FILES += \
     device/phh/treble/bluetooth/audio/config/sysbta_audio_policy_configuration_7_0.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/sysbta_audio_policy_configuration_7_0.xml
 
 SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += device/phh/treble/sepolicy
-PRODUCT_PACKAGE_OVERLAYS += device/phh/treble/overlay
+
+PRODUCT_PACKAGE_OVERLAYS += \
+	device/phh/treble/overlay \
+	device/phh/treble/overlay-lineage
+
+PRODUCT_ENFORCE_RRO_EXCLUDED_OVERLAYS += \
+	device/phh/treble/overlay-lineage/lineage-sdk
 
 $(call inherit-product, vendor/hardware_overlay/overlay.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
@@ -50,10 +56,6 @@ PRODUCT_COPY_FILES += \
 #Charger config files
 PRODUCT_COPY_FILES += \
 	device/phh/treble/charger.rc:system/etc/init/charger.rc
-
-#Charger image
-PRODUCT_PACKAGES += \
-    product_charger_res_images
 
 #USB Audio
 PRODUCT_COPY_FILES += \

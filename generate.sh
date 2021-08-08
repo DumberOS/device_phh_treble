@@ -54,7 +54,7 @@ for part in a ab;do
 				su_suffix='N'
 				if [ "$su" == "yes" ];then
 					su_suffix='S'
-					extra_packages+=' phh-su me.phh.superuser'
+					extra_packages+=' phh-su me.phh.superuser su'
 				fi
 
 				part_suffix='a'
@@ -64,7 +64,7 @@ for part in a ab;do
 					optional_base='$(call inherit-product, device/phh/treble/base-sas.mk)'
 				fi
 
-				target="treble_${arch}_${part_suffix}${apps_suffix}${su_suffix}"
+				target="lineage_${arch}_${part_suffix}${apps_suffix}${su_suffix}"
 
 				baseArch="$arch"
 				if [ "$arch" = "a64" ];then
