@@ -24,9 +24,15 @@ for part in a ab;do
 				extra_packages=""
                 vndk="vndk.mk"
 		optional_base=""
+
+				baseArch="$arch"
+				if [ "$arch" = "a64" ];then
+					baseArch="arm"
+				fi
+
 				if [ "$apps" == "gapps" ];then
 					apps_suffix="g"
-					apps_script='$(call inherit-product, device/phh/treble/gapps.mk)'
+					apps_script='$(call inherit-product, vendor/gapps/'$baseArch'/'$baseArch'-vendor.mk)'
 					apps_name="with GApps"
 				fi
 				if [ "$apps" == "gapps-go" ];then
@@ -65,11 +71,6 @@ for part in a ab;do
 				fi
 
 				target="lineage_${arch}_${part_suffix}${apps_suffix}${su_suffix}"
-
-				baseArch="$arch"
-				if [ "$arch" = "a64" ];then
-					baseArch="arm"
-				fi
 
 				zygote=32
 				if [ "$arch" = "arm64" ];then
