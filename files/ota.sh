@@ -8,9 +8,6 @@ if ! [ "$(getprop ro.boot.dynamic_partitions)" = true ];then
 fi
 
 flavor=$(getprop ro.product.product.name)
-if [ -f /system/phh/secure ];then
-	flavor=${flavor}-secure
-fi
 nextVersion=$(curl --silent -L https://raw.githubusercontent.com/phhusson/treble_experimentations/master/ota/squeak/$flavor/date)
 if [ -z "$nextVersion" ];then
     echo "Couldn't find any OTA for $flavor"
