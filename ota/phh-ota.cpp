@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <libfiemap/image_manager.h>
 #include <android-base/file.h>
+#include <android-base/properties.h>
 
 using namespace std::chrono_literals;
 using namespace std::string_literals;
@@ -23,6 +24,18 @@ std::string getNextSlot() {
             next_slot = "b";
     }
     return next_slot;
+}
+
+/*int64_t getImageSize() {
+	return std::stoull(android::base::GetProperty("phh.ota.size", "3072"));
+}*/
+
+void writeProgress(uint64_t current, uint64_t total) {
+	android::base::SetProperty("phh.ota.progress", std::to_string(100 * current / total));
+}
+
+void writeImageError(std::string error) {
+	android::base::SetProperty("phh.ota.error", std::move(error));
 }
 
 int main(int argc, char **argv) {
@@ -44,16 +57,19 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 	if(argc>=2 && strcmp(argv[1], "new-slot") == 0) {
+		writeImageError("");
 		std::string next_slot = getNextSlot();
 
 		std::string imageName = "system_otaphh_"s + next_slot;
 
 		fprintf(stderr, "Unmapping backing image returned %s\n", imgManager->UnmapImageDevice(imageName) ? "true" : "false");
 		fprintf(stderr, "Deleting backing image returned %s\n", imgManager->DeleteBackingImage(imageName) ? "true" : "false");
-		auto backRes = imgManager->CreateBackingImage(imageName, 4*1024*1024*1024LL, IImageManager::CREATE_IMAGE_DEFAULT, nullptr);
+		
+		auto backRes = imgManager->CreateBackingImage(imageName, 2300*1024*1024LL, IImageManager::CREATE_IMAGE_DEFAULT, [](uint64_t c, uint64_t t){ writeProgress(c, t); return true; });
 		if(backRes.is_ok()) {
 			fprintf(stderr, "Creating system image succeeded\n");
 		} else {
+			writeImageError(backRes.string());
 			fprintf(stderr, "Creating system image failed\n");
 			return -1;
 		}
