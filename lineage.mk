@@ -23,5 +23,5 @@ PRODUCT_SYSTEM_PROPERTIES += \
 #    device/phh/treble/ims/mediatek-ims-extension-plugin.jar:system/system_ext/framework/mediatek-ims-extension-plugin.jar
 
 
-PRODUCT_PACKAGES += tt9
-
+PRODUCT_PACKAGES += tt9 DumbdroidUpdater
+PRODUCT_PACKAGES += musicplayer
