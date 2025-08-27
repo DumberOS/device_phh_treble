@@ -790,6 +790,8 @@ chcon u:object_r:system_file:s0 /mnt/phh/xbin/su
 
 mount -o bind /mnt/phh/xbin /system/xbin
 
+resetprop_phh ro.debuggable 0
+
 for abi in "" 64;do
     f=/vendor/lib$abi/libstagefright_foundation.so
     if [ -f "$f" ];then
