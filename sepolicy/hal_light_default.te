@@ -1,0 +1,4 @@
+# F22 pro backlight fix
+
+allow hal_light sysfs_type:file rw_file_perms;
+allow hal_light sysfs_type:dir r_dir_perms;
