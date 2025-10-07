@@ -10,6 +10,20 @@
 #include <libfiemap/image_manager.h>
 #include <android-base/file.h>
 #include <android-base/properties.h>
+#include <android-base/file.h>
+#include <android-base/strings.h>
+#include <fs_mgr.h>
+#include <linux/kdev_t.h>
+#include <sys/mount.h>
+#include <sys/stat.h>
+#include <sys/sysmacros.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <string>
+#include <string.h>
+#include <unistd.h>
+#include <android-base/logging.h>
+
 
 using namespace std::chrono_literals;
 using namespace std::string_literals;
@@ -38,7 +52,67 @@ void writeImageError(std::string error) {
 	android::base::SetProperty("phh.ota.error", std::move(error));
 }
 
+static void log_kmsg(const std::string& s) {
+	android::base::WriteStringToFile("phh_check: " + s, "/dev/kmsg");
+}
+
+bool checkOta(std::string image) {
+	// Make sure dm & userdata devices are initialized (mirrors init)
+/*	BlockDevInitializer block_dev_init;
+	block_dev_init.InitDeviceMapper();
+	block_dev_init.InitDevices({"userdata"});*/
+	auto images = IImageManager::Open("phh", 0ms);
+	if (!images) {
+		log_kmsg("IImageManager::Open failed");
+		return false;
+	}
+
+	// Map the dm device (this creates /dev/block/dm-*)
+	std::string devPath;
+	if (!images->MapImageDevice(image, std::chrono::seconds(10), &devPath)) {
+		log_kmsg("MapImageDevice failed for " + image);
+		if (!images->GetMappedImageDevice(image, &devPath)) {
+			log_kmsg("GetMappedImageDevice failed for " + image);
+			images->UnmapImageDevice(image);
+			return false;
+		}
+	}
+
+	log_kmsg("device path is: " + devPath);
+	if (devPath.empty()) {
+		return false;
+	}
+
+	// Ensure mountpoint exists
+	const char* mountPoint = "/mnt/phh_ota_check";
+	mkdir("/mnt", 0755);
+	mkdir(mountPoint, 0755);
+
+	// Try read-only mount
+	log_kmsg("mounting");
+	int mountRes = mount(devPath.c_str(), mountPoint, "ext4", MS_RDONLY, "");
+	log_kmsg(
+			"test mount " + devPath + " -> " + mountPoint +
+			" returned " + std::to_string(mountRes) + " errno=" + std::to_string(errno));
+
+	bool mounted = (mountRes == 0);
+
+	log_kmsg("cleaning");
+	// Cleanup
+	if (mounted) {
+		if (umount2(mountPoint, 0) != 0) umount2(mountPoint, MNT_DETACH);
+	}
+	if (!images->UnmapImageDevice(image)) {
+		log_kmsg("UnmapImageDevice failed for " + image);
+	}
+
+	return mounted;
+}
+
 int main(int argc, char **argv) {
+	android::base::InitLogging(argv, android::base::KernelLogger);
+	android::base::SetDefaultTag("phh_check");
+	android::base::SetMinimumLogSeverity(android::base::VERBOSE);
 	mkdir("/metadata/gsi/phh", 0771);
 	chown("/metadata/gsi/phh", 0, 1000);
 	mkdir("/data/gsi/phh", 0771);
@@ -51,7 +125,13 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 	if(argc>=2 && strcmp(argv[1], "switch-slot") == 0) {
+		writeImageError("");
 		std::string next_slot = getNextSlot();
+		std::string imageName = "system_otaphh_"s + next_slot;
+		if (!checkOta(imageName)) {
+			writeImageError("Failed to mount OTA image.");
+			return -1;
+		}
 		mkdir("/metadata/phh", 0700);
 		android::base::WriteStringToFile(next_slot, "/metadata/phh/img");
 		return 0;
