@@ -8,11 +8,6 @@ service phh-ota-switch /system/bin/phh-ota switch-slot
 	disabled
 	oneshot
 
-on post-fs-data
-    rm /data/system/device_owner_2.xml
-    rm /data/system/device_policies.xml
-    rm /data/system/device_policy_state.xml
-
 on property:sys.boot_completed=1
     exec u:r:phhsu_daemon:s0 root -- /system/bin/phh-ota delete-other-slot
 
