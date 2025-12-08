@@ -1,6 +1,6 @@
 PRODUCT_MAKEFILES := \
-	$(LOCAL_DIR)/lineage_dg31.mk \
-	$(LOCAL_DIR)/lineage_dv31.mk \
-	$(LOCAL_DIR)/lineage_dg30.mk \
-	$(LOCAL_DIR)/lineage_dv30.mk \
+	$(LOCAL_DIR)/lineage_gapps31.mk \
+	$(LOCAL_DIR)/lineage_vanilla31.mk \
+	$(LOCAL_DIR)/lineage_gapps30.mk \
+	$(LOCAL_DIR)/lineage_vanilla30.mk \
 
