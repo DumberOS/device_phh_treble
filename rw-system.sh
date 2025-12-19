@@ -269,6 +269,8 @@ else
     mount -o bind /mnt/phh/xbin /system/xbin
 fi
 
+resetprop_phh ro.debuggable 0
+
 for abi in "" 64;do
     f=/vendor/lib$abi/libstagefright_foundation.so
     if [ -f "$f" ];then
