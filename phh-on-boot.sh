@@ -52,6 +52,16 @@ if [ "$vndk" = 28 ];then
     mount $minijailSrc /vendor/lib/libminijail.so
 fi
 
+# Remove Play Store/Play Services updates on microG builds.
+if [ "$(getprop ro.dumbdroid.branch)" = "vanilla" ]; then
+    for pkg in com.android.vending com.google.android.gms; do
+        if pm path "$pkg" 2>/dev/null | grep -q '^package:/data/'; then
+            pm uninstall-system-updates "$pkg" >/dev/null 2>&1
+            pm install-existing --user 0 "$pkg" >/dev/null 2>&1
+        fi
+    done
+fi
+
 #Clear looping services
 sleep 30
 getprop | \
