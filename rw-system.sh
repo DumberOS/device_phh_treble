@@ -146,12 +146,99 @@ changeKeylayout() {
     fi
 }
 
+changeVolumeCurves() {
+    ORIG_PATH="/vendor/etc/audio_policy_volumes.xml"
+    MOD_DIR="/mnt/phh"
+    MOD_PATH="$MOD_DIR/audio_policy_volumes.xml"
+
+    mkdir -p "$MOD_DIR"
+    cp -a "$ORIG_PATH" "$MOD_PATH"
+    PATCH_DATA='--- audio_policy_volumes.xml
++++ audio_policy_volumes.xml
+@@ -36,10 +36,10 @@
+         <point>100,0</point>
+     </volume>
+     <volume stream="AUDIO_STREAM_VOICE_CALL" deviceCategory="DEVICE_CATEGORY_EARPIECE">
+-        <point>0,-2400</point>
+-        <point>33,-1600</point>
+-        <point>66,-800</point>
+-        <point>100,0</point>
++        <point>0,-5000</point>
++        <point>33,-3000</point>
++        <point>66,-1500</point>
++        <point>100,0</point>
+     </volume>
+     <volume stream="AUDIO_STREAM_VOICE_CALL" deviceCategory="DEVICE_CATEGORY_EXT_MEDIA"
+                                              ref="DEFAULT_MEDIA_VOLUME_CURVE"/>
+'
+
+    # No heredoc => no shell temp file needed
+    printf '%s' "$PATCH_DATA" | patch -p0 -d "$MOD_DIR"
+
+    chcon u:object_r:vendor_configs_file:s0 $MOD_PATH
+    mount -o bind "$MOD_PATH" "$ORIG_PATH"
+}
+
+fixAudioDevice() {
+    ORIG_PATH="/vendor/etc/audio_device.xml"
+    MOD_DIR="/mnt/phh"
+    MOD_PATH="$MOD_DIR/audio_device.xml"
+
+    mkdir -p "$MOD_DIR"
+    cp -a "$ORIG_PATH" "$MOD_PATH"
+    PATCH_DATA='--- audio_device.xml
++++ audio_device.xml
+@@ -164,12 +164,16 @@
+         <kctl name="Audio_MicSource1_Setting" value="ADC1" />
+         <kctl name="Audio_ADC_1_Switch" value="On" />
+         <kctl name="Audio_ADC_2_Switch" value="On" />
+-        <kctl name="Audio_Preamp1_Switch" value="IN_ADC3" />
+-        <kctl name="Audio_Preamp2_Switch" value="IN_ADC1" />
++        <kctl name="Audio_Preamp1_Switch" value="IN_ADC1" />
++        <kctl name="Audio_Preamp2_Switch" value="OPEN" />
++        <kctl name="Audio_PGA1_Setting" value="18Db" />
++        <kctl name="Audio_PGA2_Setting" value="0Db" />
+     </path>
+     <path name="builtin_Mic_BackMic" value="turnoff">
+         <kctl name="Audio_Preamp1_Switch" value="OPEN" />
+         <kctl name="Audio_Preamp2_Switch" value="OPEN" />
++        <kctl name="Audio_PGA1_Setting" value="0Db" />
++        <kctl name="Audio_PGA2_Setting" value="0Db" />
+         <kctl name="Audio_ADC_1_Switch" value="Off" />
+         <kctl name="Audio_ADC_2_Switch" value="Off" />
+     </path>
+@@ -178,11 +182,15 @@
+         <kctl name="Audio_ADC_1_Switch" value="On" />
+         <kctl name="Audio_ADC_2_Switch" value="On" />
+         <kctl name="Audio_Preamp1_Switch" value="IN_ADC1" />
+-        <kctl name="Audio_Preamp2_Switch" value="IN_ADC3" />
++        <kctl name="Audio_Preamp2_Switch" value="OPEN" />
++        <kctl name="Audio_PGA1_Setting" value="18Db" />
++        <kctl name="Audio_PGA2_Setting" value="0Db" />
+     </path>
+     <path name="builtin_Mic_BackMic_Inverse" value="turnoff">
+         <kctl name="Audio_Preamp1_Switch" value="OPEN" />
+         <kctl name="Audio_Preamp2_Switch" value="OPEN" />
++        <kctl name="Audio_PGA1_Setting" value="0Db" />
++        <kctl name="Audio_PGA2_Setting" value="0Db" />
+         <kctl name="Audio_ADC_1_Switch" value="Off" />
+         <kctl name="Audio_ADC_2_Switch" value="Off" />
+     </path>
+'
+
+    printf '%s' "$PATCH_DATA" | patch -p0 -d "$MOD_DIR"
+    chcon u:object_r:vendor_configs_file:s0 $MOD_PATH
+    mount -o bind "$MOD_PATH" "$ORIG_PATH"
+}
+
 mkdir -p /mnt/phh/
 mount -t tmpfs -o rw,nodev,relatime,mode=755,gid=0 none /mnt/phh || true
 mkdir /mnt/phh/empty_dir
 fixSPL
 
 changeKeylayout
+changeVolumeCurves
+fixAudioDevice
 
 foundFingerprint=false
 
@@ -355,5 +442,7 @@ if getprop ro.vendor.radio.default_network |grep -qE '[0-9]';then
 fi
 
 # Override media volume steps
-resetprop_phh ro.config.media_vol_steps 25
+resetprop_phh ro.config.media_vol_steps 15
 resetprop_phh ro.config.media_vol_default 8
+resetprop_phh ro.config.vc_call_vol_steps 15
+
