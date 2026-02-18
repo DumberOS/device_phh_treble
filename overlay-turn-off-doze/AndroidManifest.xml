@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="me.phh.treble.overlay.disableautopowermodes">
+
+    <overlay
+        android:targetPackage="android"
+        android:isStatic="true"
+        android:priority="1000"
+        android:requiredSystemPropertyName="ro.vendor.build.fingerprint"
+        android:requiredSystemPropertyValue="+(^Qin/full_k61v1_64_gms*|^QIN/full_AGN*)" />
+
+    <application
+        android:label="TrebleDisableAutoPowerModes"
+        android:hasCode="false" />
+</manifest>
