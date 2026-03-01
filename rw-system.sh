@@ -1,5 +1,10 @@
 #!/system/bin/sh
 
+PHH_STATE_DIR=/metadata/phh
+mkdir -p "$PHH_STATE_DIR"
+chown system:system "$PHH_STATE_DIR" 2>/dev/null || true
+chmod 0775 "$PHH_STATE_DIR" 2>/dev/null || true
+
 if [ -z "$debug" ] && [ -f /cache/phh-log ];then
 	mkdir -p /cache/phh
 	debug=1 exec sh -x "$(readlink -f -- "$0")" > /cache/phh/logs 2>&1
@@ -291,9 +296,18 @@ mkdir /mnt/phh/empty_dir
 fixSPL
 
 changeKeylayout
-changeVolumeCurves
-fixAudioDevice
-fixVolumeGainMap
+
+if [ ! -f "$PHH_STATE_DIR/disable_voip_earpiece" ]; then
+    changeVolumeCurves
+fi
+
+if [ ! -f "$PHH_STATE_DIR/disable_wa_mic_fix" ]; then
+    fixAudioDevice
+fi
+
+if [ ! -f "$PHH_STATE_DIR/disable_tel_earpiece" ]; then
+    fixVolumeGainMap
+fi
 
 foundFingerprint=false
 
