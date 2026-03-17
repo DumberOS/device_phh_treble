@@ -68,6 +68,13 @@ PRODUCT_COPY_FILES += \
 	device/phh/treble/nfc/libnfc-nci.conf:system/phh/libnfc-nci-oreo.conf \
 	device/phh/treble/nfc/libnfc-nci-huawei.conf:system/phh/libnfc-nci-huawei.conf
 
+# Advertise NFC features so Settings/NfcAdapter expose NFC controls.
+PRODUCT_COPY_FILES += \
+	frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
+	frameworks/native/data/etc/android.hardware.nfc.hce.xml:system/etc/permissions/android.hardware.nfc.hce.xml \
+	frameworks/native/data/etc/android.hardware.nfc.hcef.xml:system/etc/permissions/android.hardware.nfc.hcef.xml \
+	frameworks/native/data/etc/android.hardware.nfc.uicc.xml:system/etc/permissions/android.hardware.nfc.uicc.xml
+
 # LineageOS build may need this to make NFC work
 PRODUCT_PACKAGES += \
         NfcNci \
@@ -272,4 +279,3 @@ PRODUCT_PRODUCT_PROPERTIES += \
 PRODUCT_PACKAGES += \
     AvoidAppsInCutoutOverlay \
     NoCutoutOverlay
-
