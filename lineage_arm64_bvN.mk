@@ -9,7 +9,10 @@ PRODUCT_NAME := arm64_bvN
 PRODUCT_DEVICE := tdgsi_arm64_ab
 PRODUCT_BRAND := google
 PRODUCT_SYSTEM_BRAND := google
-PRODUCT_MODEL := Dumbdroid vanilla
+PRODUCT_MODEL := DumberOS
+PRODUCT_MANUFACTURER := dumber
+PRODUCT_SYSTEM_MANUFACTURER := dumber
+
 
 # Overwrite the inherited "emulator" characteristics
 PRODUCT_CHARACTERISTICS := device
