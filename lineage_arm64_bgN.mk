@@ -46,6 +46,7 @@ SetupWizard \
 #talkback \
 
 PRODUCT_PACKAGES += package_filter
+PRODUCT_PACKAGES += more_apps
 
 #PRODUCT_PACKAGES += ImsApp
 

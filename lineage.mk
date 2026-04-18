@@ -27,5 +27,4 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_PACKAGES += tt9
 PRODUCT_PACKAGES += DumbdroidUpdater DumbdroidPanel DumbdroidDonationLink DumbdroidAdmin
-PRODUCT_PACKAGES += musicplayer breezy_weather organic_maps
 PRODUCT_PACKAGES += TrebleDisableAutoPowerModes
