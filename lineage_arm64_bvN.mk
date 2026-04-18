@@ -41,7 +41,7 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PACKAGES += package_filter
 
-PRODUCT_PACKAGES += GmsCore GsfProxy FakeStore aurora_store
+PRODUCT_PACKAGES += GmsCore GsfProxy FakeStore more_apps
 
 #PRODUCT_PACKAGES += ImsApp
 
