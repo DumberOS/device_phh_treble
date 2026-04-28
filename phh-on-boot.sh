@@ -52,14 +52,107 @@ if [ "$vndk" = 28 ];then
     mount $minijailSrc /vendor/lib/libminijail.so
 fi
 
-# Remove Play Store/Play Services updates on microG builds.
-if [ "$(getprop ro.dumbdroid.branch)" = "vanilla" ]; then
-    for pkg in com.android.vending com.google.android.gms; do
-        if pm path "$pkg" 2>/dev/null | grep -q '^package:/data/'; then
-            pm uninstall-system-updates "$pkg" >/dev/null 2>&1
-            pm install-existing --user 0 "$pkg" >/dev/null 2>&1
+# Remove Play Store/Play Services updates when the installed vending update
+# looks like a different distro than the preinstalled one. Compare the
+# preinstalled vending APK size with the updated /data payload size and reset
+# both packages if either side is at least 8x larger than the other.
+vending_system_apk() {
+    for apk in \
+        /product/priv-app/FakeStore/FakeStore.apk \
+        /system/product/priv-app/FakeStore/FakeStore.apk \
+        /product/priv-app/Phonesky/Phonesky.apk \
+        /system/product/priv-app/Phonesky/Phonesky.apk
+    do
+        if [ -f "$apk" ]; then
+            echo "$apk"
+            return 0
         fi
     done
+    return 1
+}
+
+pkg_update_dir() {
+    code_path="$(pm path "$1" 2>/dev/null | sed -n 's#^package:##p' | head -n1)"
+    case "$code_path" in
+        /data/app/*)
+            echo "${code_path%/*}"
+            return 0
+            ;;
+    esac
+    return 1
+}
+
+size_kb() {
+    du -sk "$1" 2>/dev/null | awk 'NR == 1 { print $1 }'
+}
+
+apk_payload_size_kb() {
+    target="$1"
+
+    if [ -f "$target" ]; then
+        size_kb "$target"
+        return 0
+    fi
+
+    if [ -d "$target" ]; then
+        find "$target" -maxdepth 1 -name '*.apk' -type f -exec stat -c '%s' {} \; 2>/dev/null | \
+            awk '{ sum += $1 } END { if (sum > 0) print int((sum + 1023) / 1024) }'
+        return 0
+    fi
+
+    return 1
+}
+
+bootlog() {
+    log -t phh-on-boot "$*"
+}
+
+reset_pkg_to_system() {
+    pkg="$1"
+
+    if ! pm path "$pkg" 2>/dev/null | grep -q '^package:/data/'; then
+        bootlog "skip reset for $pkg: not on /data"
+        return 0
+    fi
+
+    bootlog "resetting $pkg from /data update"
+    pm uninstall-system-updates "$pkg" >/dev/null 2>&1
+
+    if pm path "$pkg" 2>/dev/null | grep -q '^package:/data/'; then
+        bootlog "uninstall-system-updates did not remove $pkg, trying pm uninstall"
+        pm uninstall "$pkg" >/dev/null 2>&1
+    fi
+
+    pm install-existing --user 0 "$pkg" >/dev/null 2>&1
+    bootlog "final path for $pkg: $(pm path "$pkg" 2>/dev/null | head -n1)"
+}
+
+system_vending_apk="$(vending_system_apk)"
+updated_vending_dir="$(pkg_update_dir com.android.vending)"
+bootlog "system vending apk: ${system_vending_apk:-<none>}"
+bootlog "updated vending dir: ${updated_vending_dir:-<none>}"
+
+if [ -n "$system_vending_apk" ] && [ -n "$updated_vending_dir" ]; then
+    system_vending_size_kb="$(apk_payload_size_kb "$system_vending_apk")"
+    updated_vending_size_kb="$(apk_payload_size_kb "$updated_vending_dir")"
+    bootlog "vending apk payload sizes kb: system=${system_vending_size_kb:-<none>} updated=${updated_vending_size_kb:-<none>}"
+
+    if [ -n "$system_vending_size_kb" ] && [ -n "$updated_vending_size_kb" ] && \
+        [ "$system_vending_size_kb" -gt 0 ] && [ "$updated_vending_size_kb" -gt 0 ]; then
+        if [ "$updated_vending_size_kb" -ge $((system_vending_size_kb * 8)) ] || \
+            [ "$system_vending_size_kb" -ge $((updated_vending_size_kb * 8)) ]; then
+            bootlog "vending size mismatch matched 8x rule, resetting vending and gms"
+            for pkg in com.android.vending com.google.android.gms; do
+                reset_pkg_to_system "$pkg"
+            done
+        else
+            bootlog "vending size mismatch did not match 8x rule"
+        fi
+    else
+        bootlog "vending size check skipped: missing or zero sizes"
+    fi
+else
+    bootlog "vending size check skipped: missing system apk or updated dir"
 fi
 
 #Clear looping services
