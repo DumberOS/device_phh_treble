@@ -36,6 +36,7 @@ Velvet \
 Eleven \
 MtkInCallService \
 SetupWizard \
+Jelly \
 #TrebleApp \
 #Seedvault \
 #LineageSetupWizard \
