@@ -66,6 +66,12 @@ fi
 
 setprop sys.usb.ffs.aio_compat true
 
+case "$(getprop ro.product.vendor.model)" in
+    "Dumber mini"|"S9")
+        resetprop_phh ro.sf.lcd_density 210
+        ;;
+esac
+
 if getprop ro.vendor.build.fingerprint | grep -q -i -e Blackview/BV9500Plus;then
     setprop persist.adb.nonblocking_ffs true
 else
