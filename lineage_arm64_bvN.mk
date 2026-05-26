@@ -42,7 +42,7 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PACKAGES += package_filter
 
-PRODUCT_PACKAGES += GmsCore GsfProxy FakeStore more_apps
+PRODUCT_PACKAGES += GmsCore GsfProxy FakeStore more_apps import_contacts
 
 #PRODUCT_PACKAGES += ImsApp
 
