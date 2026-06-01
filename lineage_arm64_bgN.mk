@@ -36,7 +36,7 @@ Velvet \
 Eleven \
 MtkInCallService \
 SetupWizard \
-Jelly \
+#Jelly \
 #TrebleApp \
 #Seedvault \
 #LineageSetupWizard \
@@ -47,7 +47,8 @@ Jelly \
 #talkback \
 
 PRODUCT_PACKAGES += package_filter
-PRODUCT_PACKAGES += more_apps
+# We don't want More Apps in the gapps build
+#PRODUCT_PACKAGES += more_apps
 
 #PRODUCT_PACKAGES += ImsApp
 

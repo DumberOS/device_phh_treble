@@ -34,7 +34,7 @@ Velvet \
 Eleven \
 NotoColorEmojiLegacy.ttf \
 MtkInCallService \
-Jelly \
+#Jelly \
 #Seedvault \
 
 PRODUCT_PACKAGES += \
