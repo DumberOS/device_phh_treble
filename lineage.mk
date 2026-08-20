@@ -26,5 +26,5 @@ PRODUCT_COPY_FILES += \
 #    device/phh/treble/ims/mediatek-ims-extension-plugin.jar:system/system_ext/framework/mediatek-ims-extension-plugin.jar
 
 PRODUCT_PACKAGES += tt9
-PRODUCT_PACKAGES += DumbdroidUpdater DumbdroidPanel DumbdroidDonationLink DumbdroidAdmin
+PRODUCT_PACKAGES += DumbdroidUpdater DumbdroidPanel DumbdroidDonationLink DumbdroidAdmin DumbdroidBugreportUploader
 PRODUCT_PACKAGES += TrebleDisableAutoPowerModes
