@@ -297,6 +297,35 @@ fixVolumeGainMap() {
     mount -o bind "$MOD_PATH" "$ORIG_PATH"
 }
 
+hasNfcHardware() {
+    for manifest in \
+        /vendor/manifest.xml \
+        /vendor/etc/vintf/manifest.xml \
+        /vendor/etc/vintf/manifest/*.xml \
+        /odm/manifest.xml \
+        /odm/etc/vintf/manifest.xml \
+        /odm/etc/vintf/manifest/*.xml; do
+        [ -f "$manifest" ] || continue
+        grep -qF android.hardware.nfc "$manifest" && return 0
+    done
+
+    # Some older vendors omit NFC from VINTF, so also accept a HAL
+    # implementation or a known NFC controller device node as evidence.
+    for implementation in \
+        /vendor/bin/hw/*nfc* \
+        /vendor/lib*/hw/*nfc*.so \
+        /odm/bin/hw/*nfc* \
+        /odm/lib*/hw/*nfc*.so \
+        /dev/nfc* \
+        /dev/nq-nci \
+        /dev/pn54* \
+        /dev/st21nfc; do
+        [ -e "$implementation" ] && return 0
+    done
+
+    return 1
+}
+
 mkdir -p /mnt/phh/
 mount -t tmpfs -o rw,nodev,relatime,mode=755,gid=0 none /mnt/phh || true
 mkdir /mnt/phh/empty_dir
@@ -314,6 +343,16 @@ fi
 
 if [ ! -f "$PHH_STATE_DIR/disable_tel_earpiece" ]; then
     fixVolumeGainMap
+fi
+
+# The GSI provides NFC feature declarations for vendors that omit them. Hide
+# those declarations when the device has no NFC hardware; otherwise NfcNci is
+# started as a persistent app and repeatedly tries to load a nonexistent HAL.
+if ! hasNfcHardware; then
+    for feature in /system/etc/permissions/android.hardware.nfc*.xml; do
+        [ -f "$feature" ] || continue
+        mount -o bind /system/phh/empty "$feature"
+    done
 fi
 
 foundFingerprint=false
