@@ -312,7 +312,14 @@ if [ ! -f "$PHH_STATE_DIR/disable_wa_mic_fix" ]; then
 fi
 
 if [ ! -f "$PHH_STATE_DIR/disable_tel_earpiece" ]; then
-    fixVolumeGainMap
+    case "$(getprop ro.product.vendor.model)" in
+        "Dumber mini"|"S9")
+            # Skip the fix for Dumber Mini
+            ;;
+        *)
+            fixVolumeGainMap
+            ;;
+    esac
 fi
 
 foundFingerprint=false
