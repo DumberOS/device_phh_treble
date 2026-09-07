@@ -11,6 +11,9 @@ type mtk_hal_power, domain;
 allow mtk_hal_power system_data_root_file:file create_file_perms;
 allow zygote ashmem_device:chr_file execute;
 
+type wfca_rds_socket, file_type, coredomain_socket;
+allow init wfca_rds_socket:sock_file create_file_perms;
+
 attribute hal_mms_server;
 binder_call({appdomain -isolated_app}, hal_mms_server)
 binder_call(hal_mms_server, {appdomain -isolated_app})
@@ -27,3 +30,7 @@ permissive tkcore;
 
 allow platform_app sysfs_leds:dir r_dir_perms;
 allow platform_app sysfs_leds:file r_file_perms;
+
+# MediaTek's IPsec domain is a vendor-private netdomain. Its vendor policy
+# grants write/getattr for xfrm_acq_expires but omits the required open bit.
+allow netdomain proc_net:file open;

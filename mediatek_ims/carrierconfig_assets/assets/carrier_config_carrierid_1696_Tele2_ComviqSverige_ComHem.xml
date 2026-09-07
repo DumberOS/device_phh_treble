@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<carrier_config>
+    <!-- Keep MTK's stock WFC default while exposing IMS features on the GSI. -->
+    <boolean name="mtk_carrier_ss_not_support_xcap" value="true" />
+    <boolean name="carrier_volte_available_bool" value="true" />
+    <boolean name="carrier_wfc_ims_available_bool" value="true" />
+    <boolean name="carrier_wfc_supports_wifi_only_bool" value="true" />
+    <int name="carrier_default_wfc_ims_mode_int" value="1" />
+    <boolean name="wos_flight_mode_support_bool" value="true" />
+</carrier_config>

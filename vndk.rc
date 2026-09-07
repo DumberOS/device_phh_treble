@@ -97,6 +97,16 @@ on property:persist.sys.phh.force_display_5g=1
 on property:persist.sys.phh.ims.floss=true
     exec u:r:phhsu_daemon:s0 root -- /system/bin/resetprop_phh ro.telephony.iwlan_operation_mode AP-assisted
 
+# Apply these after both persistent properties and the post-fs stack selector are ready.
+on property:ro.persistent_properties.ready=true && property:sys.phh.stock_mtk_ims=true
+    exec u:r:phhsu_daemon:s0 root -- /system/bin/resetprop_phh persist.vendor.wfc.sys_wfc_support 1
+    setprop persist.dbg.wfc_avail_ovr 1
+    setprop persist.sys.phh.ims.floss false
+
+on property:ro.persistent_properties.ready=true && property:sys.phh.stock_mtk_ims=false
+    exec u:r:phhsu_daemon:s0 root -- /system/bin/resetprop_phh persist.vendor.wfc.sys_wfc_support 0
+    setprop persist.dbg.wfc_avail_ovr 0
+
 on property:persist.sys.phh.enable_sf_gl_backpressure=*
     setprop debug.sf.enable_gl_backpressure ${persist.sys.phh.enable_sf_gl_backpressure}
 

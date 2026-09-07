@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<carrier_config>
+    <boolean name="carrier_volte_available_bool" value="true" />
+    <boolean name="carrier_wfc_ims_available_bool" value="true" />
+    <boolean name="carrier_wfc_supports_wifi_only_bool" value="true" />
+    <boolean name="carrier_default_wfc_ims_enabled_bool" value="true" />
+    <int name="carrier_default_wfc_ims_mode_int" value="1" />
+    <boolean name="carrier_default_wfc_ims_roaming_enabled_bool" value="true" />
+    <int name="carrier_default_wfc_ims_roaming_mode_int" value="1" />
+    <boolean name="editable_wfc_mode_bool" value="true" />
+    <boolean name="editable_wfc_roaming_mode_bool" value="true" />
+    <boolean name="wos_flight_mode_support_bool" value="true" />
+</carrier_config>

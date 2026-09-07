@@ -299,6 +299,57 @@ fixVolumeGainMap() {
 mkdir -p /mnt/phh/
 mount -t tmpfs -o rw,nodev,relatime,mode=755,gid=0 none /mnt/phh || true
 mkdir /mnt/phh/empty_dir
+
+STOCK_MTK_IMS_FLAG="$PHH_STATE_DIR/dumber_mini_stock_ims"
+STOCK_MTK_IMS_STAGE=/system/etc/phh/stock_mtk_ims
+
+stock_mtk_ims_targets='/system/priv-app/ImsService
+/system/priv-app/MtkGbaService
+/system/priv-app/MtkTelephonyAssist
+/system/app/mediatek-res
+/system/system_ext/priv-app/CarrierConfig'
+
+hide_stock_mtk_ims_mountpoints() {
+    for target in \
+        /system/priv-app/ImsService \
+        /system/priv-app/MtkGbaService \
+        /system/priv-app/MtkTelephonyAssist \
+        /system/app/mediatek-res; do
+        mount -o bind /mnt/phh/empty_dir "$target" || return 1
+    done
+}
+
+unmount_stock_mtk_ims() {
+    for target in $stock_mtk_ims_targets; do
+        umount "$target" 2>/dev/null || true
+    done
+}
+
+mount_stock_mtk_ims() {
+    mount -o bind "$STOCK_MTK_IMS_STAGE/ImsService" \
+        /system/priv-app/ImsService || return 1
+    mount -o bind "$STOCK_MTK_IMS_STAGE/MtkGbaService" \
+        /system/priv-app/MtkGbaService || return 1
+    mount -o bind "$STOCK_MTK_IMS_STAGE/MtkTelephonyAssist" \
+        /system/priv-app/MtkTelephonyAssist || return 1
+    mount -o bind "$STOCK_MTK_IMS_STAGE/mediatek-res" \
+        /system/app/mediatek-res || return 1
+    mount -o bind "$STOCK_MTK_IMS_STAGE/MtkCarrierConfig" \
+        /system/system_ext/priv-app/CarrierConfig || return 1
+}
+
+if [ -f "$STOCK_MTK_IMS_FLAG" ] && mount_stock_mtk_ims; then
+    setprop sys.phh.stock_mtk_ims true
+else
+    if [ -f "$STOCK_MTK_IMS_FLAG" ]; then
+        log -t PHH "Stock MTK IMS staging incomplete; falling back to TrebleApp IMS"
+    fi
+    unmount_stock_mtk_ims
+    hide_stock_mtk_ims_mountpoints || \
+        log -t PHH "Failed to hide one or more stock MTK IMS mount points"
+    setprop sys.phh.stock_mtk_ims false
+fi
+
 fixSPL
 
 changeKeylayout

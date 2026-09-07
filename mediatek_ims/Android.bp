@@ -1,0 +1,159 @@
+genrule {
+    name: "MtkCarrierConfig_compat_apk",
+    srcs: [
+        "app/MtkCarrierConfig.apk",
+        "carrierconfig_assets/assets/carrier_config_carrierid_1696_Tele2_ComviqSverige_ComHem.xml",
+    ],
+    tools: [
+        "merge_zips",
+        "soong_zip",
+        "zip2zip",
+    ],
+    out: ["MtkCarrierConfig-compat.apk"],
+    cmd: "$(location zip2zip) -i $(location app/MtkCarrierConfig.apk) " +
+        "-o $(genDir)/MtkCarrierConfig-base.apk " +
+        "-x assets/carrier_config_carrierid_1696_Tele2_ComviqSverige_ComHem.xml && " +
+        "$(location soong_zip) -o $(genDir)/carrier-config-compat.zip " +
+        "-C device/phh/treble/mediatek_ims/carrierconfig_assets " +
+        "-f $(location carrierconfig_assets/assets/carrier_config_carrierid_1696_Tele2_ComviqSverige_ComHem.xml) && " +
+        "$(location merge_zips) $(out) " +
+        "$(genDir)/MtkCarrierConfig-base.apk " +
+        "$(genDir)/carrier-config-compat.zip",
+}
+
+android_app_import {
+    name: "stock_mtk_ims_service_signed",
+    apk: "app/ImsService.apk",
+    certificate: "platform",
+    privileged: true,
+    enforce_uses_libs: false,
+    dex_preopt: {
+        enabled: false,
+    },
+}
+
+prebuilt_etc {
+    name: "stock_mtk_ims_service_staged",
+    src: ":stock_mtk_ims_service_signed",
+    filename: "ImsService.apk",
+    sub_dir: "phh/stock_mtk_ims/ImsService",
+}
+
+android_app_import {
+    name: "stock_mtk_carrier_config_signed",
+    apk: ":MtkCarrierConfig_compat_apk",
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    dex_preopt: {
+        enabled: false,
+    },
+}
+
+prebuilt_etc {
+    name: "stock_mtk_carrier_config_staged",
+    src: ":stock_mtk_carrier_config_signed",
+    // PackageManager caches the base APK path across stack switches.
+    filename: "CarrierConfig.apk",
+    sub_dir: "phh/stock_mtk_ims/MtkCarrierConfig",
+}
+
+android_app_import {
+    name: "stock_mtk_gba_service_signed",
+    apk: "app/MtkGbaService.apk",
+    certificate: "platform",
+    privileged: true,
+    dex_preopt: {
+        enabled: false,
+    },
+}
+
+prebuilt_etc {
+    name: "stock_mtk_gba_service_staged",
+    src: ":stock_mtk_gba_service_signed",
+    filename: "MtkGbaService.apk",
+    sub_dir: "phh/stock_mtk_ims/MtkGbaService",
+}
+
+android_app_import {
+    name: "stock_mtk_telephony_assist_signed",
+    apk: "app/MtkTelephonyAssist.apk",
+    certificate: "platform",
+    privileged: true,
+    dex_preopt: {
+        enabled: false,
+    },
+}
+
+prebuilt_etc {
+    name: "stock_mtk_telephony_assist_staged",
+    src: ":stock_mtk_telephony_assist_signed",
+    filename: "MtkTelephonyAssist.apk",
+    sub_dir: "phh/stock_mtk_ims/MtkTelephonyAssist",
+}
+
+android_app_import {
+    name: "stock_mtk_mediatek_res_signed",
+    apk: "app/mediatek-res.apk",
+    certificate: "platform",
+    dex_preopt: {
+        enabled: false,
+    },
+}
+
+prebuilt_etc {
+    name: "stock_mtk_mediatek_res_staged",
+    src: ":stock_mtk_mediatek_res_signed",
+    filename: "mediatek-res.apk",
+    sub_dir: "phh/stock_mtk_ims/mediatek-res",
+}
+
+dex_import {
+    name: "mediatek-common",
+    jars: ["framework/mediatek-common.jar"],
+}
+
+dex_import {
+    name: "mediatek-framework",
+    jars: ["framework/mediatek-framework.jar"],
+}
+
+dex_import {
+    name: "mediatek-telephony-base",
+    jars: ["framework/mediatek-telephony-base.jar"],
+}
+
+dex_import {
+    name: "mediatek-telephony-common",
+    jars: ["framework/mediatek-telephony-common.jar"],
+}
+
+dex_import {
+    name: "mediatek-carrier-config-manager",
+    jars: ["framework/mediatek-carrier-config-manager.jar"],
+}
+
+dex_import {
+    name: "mediatek-ims-common",
+    jars: ["framework/mediatek-ims-common.jar"],
+}
+
+dex_import {
+    name: "mediatek-ims-base",
+    jars: ["framework/mediatek-ims-base.jar"],
+}
+
+dex_import {
+    name: "mediatek-telecom-common",
+    jars: ["framework/mediatek-telecom-common.jar"],
+}
+
+dex_import {
+    name: "mediatek-wfo-legacy",
+    jars: ["framework/mediatek-wfo-legacy.jar"],
+}
+
+dex_import {
+    name: "mediatek-ims-extension-plugin",
+    jars: ["framework/mediatek-ims-extension-plugin.jar"],
+}

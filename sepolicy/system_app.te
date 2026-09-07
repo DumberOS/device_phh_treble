@@ -2,3 +2,15 @@
 allow system_app metadata_file:dir r_dir_perms;
 allow system_app metadata_file:dir create_dir_perms;
 allow system_app metadata_file:file create_file_perms;
+
+# Stock MTK exposes several IMS/WFC-related vendor properties to system-side
+# telephony apps; mirror the minimal readable subset for the imported IMS stack.
+get_prop(system_app, system_mtk_cta_set_prop)
+get_prop(system_app, system_mtk_dbg_ims_prop)
+get_prop(system_app, system_mtk_imsconfig_prop)
+get_prop(system_app, system_mtk_opt_in_url_prop)
+get_prop(system_app, system_mtk_persist_ims_data_prop)
+get_prop(system_app, system_mtk_supp_serv_prop)
+get_prop(system_app, system_mtk_vodata_prop)
+get_prop(system_app, system_mtk_wfc_entitlement_prop)
+get_prop(system_app, system_mtk_wfc_opt_in_prop)

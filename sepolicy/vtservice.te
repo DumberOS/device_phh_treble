@@ -1,0 +1,12 @@
+type vtservice, domain;
+type vtservice_exec, system_file_type, exec_type, file_type;
+
+init_daemon_domain(vtservice)
+binder_use(vtservice)
+add_service(vtservice, vtservice_service)
+binder_call(vtservice, mediaserver)
+allow mediaserver vtservice:binder transfer;
+allow vtservice mediaserver:fd use;
+
+get_prop(vtservice, system_mtk_ims_vt_signalstrength_prop)
+get_prop(vtservice, boot_status_prop)

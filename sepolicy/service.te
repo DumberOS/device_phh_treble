@@ -1,1 +1,7 @@
-type qcrilam_service,    service_manager_type;
+type qcrilam_service, service_manager_type;
+type mtk_epdg_service, app_api_service, system_server_service, service_manager_type;
+type mtk_phonesubinfo_service, app_api_service, service_manager_type;
+type mtk_registry_service, app_api_service, service_manager_type;
+type mtk_simphonebook_service, app_api_service, service_manager_type;
+type mtk_vodata_service, app_api_service, system_server_service, service_manager_type;
+type vtservice_service, service_manager_type;

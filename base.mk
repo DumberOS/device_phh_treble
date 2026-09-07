@@ -30,6 +30,66 @@ $(call inherit-product, vendor/hardware_overlay/overlay.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base_telephony.mk)
 
+PRODUCT_PACKAGES += \
+    stock_mtk_ims_service_staged \
+    stock_mtk_carrier_config_staged \
+    stock_mtk_gba_service_staged \
+    stock_mtk_telephony_assist_staged \
+    stock_mtk_mediatek_res_staged \
+    mediatek-common \
+    mediatek-framework \
+    mediatek-telephony-base \
+    mediatek-telephony-common \
+    mediatek-carrier-config-manager \
+    mediatek-ims-common \
+    mediatek-ims-base \
+    mediatek-telecom-common \
+    mediatek-wfo-legacy \
+    mediatek-ims-extension-plugin
+
+PRODUCT_BOOT_JARS_EXTRA += \
+    mediatek-common \
+    mediatek-framework \
+    mediatek-telephony-base \
+    mediatek-telephony-common \
+    mediatek-carrier-config-manager \
+    mediatek-ims-common \
+    mediatek-ims-base \
+    mediatek-telecom-common
+
+PRODUCT_COPY_FILES += \
+    device/phh/treble/mediatek_ims/bin/vtservice:system/bin/vtservice \
+    device/phh/treble/mediatek_ims/init/init.vtservice.rc:system/etc/init/init.vtservice.rc \
+    device/phh/treble/mediatek_ims/permissions/privapp-permissions-com.mediatek.ims.xml:system/etc/permissions/privapp-permissions-com.mediatek.ims.xml \
+    device/phh/treble/mediatek_ims/permissions/privapp-permissions-com.mediatek.telephony.xml:system/etc/permissions/privapp-permissions-com.mediatek.telephony.xml \
+    device/phh/treble/mediatek_ims/permissions/privapp-permissions-com.android.carrierconfig.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/privapp-permissions-com.android.carrierconfig.xml \
+    device/phh/treble/mediatek_ims/permissions/com.mediatek.wfo.legacy.xml:system/etc/permissions/com.mediatek.wfo.legacy.xml \
+    device/phh/treble/mediatek_ims/sysconfig/com.mediatek.ims.config.xml:system/etc/sysconfig/com.mediatek.ims.config.xml \
+    device/phh/treble/mediatek_ims/mountpoint:$(TARGET_COPY_OUT_SYSTEM)/priv-app/ImsService/.stock_mtk_ims_mountpoint \
+    device/phh/treble/mediatek_ims/mountpoint:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MtkGbaService/.stock_mtk_ims_mountpoint \
+    device/phh/treble/mediatek_ims/mountpoint:$(TARGET_COPY_OUT_SYSTEM)/priv-app/MtkTelephonyAssist/.stock_mtk_ims_mountpoint \
+    device/phh/treble/mediatek_ims/mountpoint:$(TARGET_COPY_OUT_SYSTEM)/app/mediatek-res/.stock_mtk_ims_mountpoint \
+    device/phh/treble/mediatek_ims/lib/libmtk_vt_wrapper.so:$(TARGET_COPY_OUT_SYSTEM)/lib/libmtk_vt_wrapper.so \
+    device/phh/treble/mediatek_ims/lib/libvcodec_cap.so:$(TARGET_COPY_OUT_SYSTEM)/lib/libvcodec_cap.so \
+    device/phh/treble/mediatek_ims/lib/libvcodec_capenc.so:$(TARGET_COPY_OUT_SYSTEM)/lib/libvcodec_capenc.so \
+    device/phh/treble/mediatek_ims/lib64/libcomutils.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libcomutils.so \
+    device/phh/treble/mediatek_ims/lib64/libimsma.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libimsma.so \
+    device/phh/treble/mediatek_ims/lib64/libimsma_adapt.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libimsma_adapt.so \
+    device/phh/treble/mediatek_ims/lib64/libimsma_rtp.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libimsma_rtp.so \
+    device/phh/treble/mediatek_ims/lib64/libimsma_socketwrapper.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libimsma_socketwrapper.so \
+    device/phh/treble/mediatek_ims/lib64/libmtk_vt_service.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libmtk_vt_service.so \
+    device/phh/treble/mediatek_ims/lib64/libmtk_vt_wrapper.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libmtk_vt_wrapper.so \
+    device/phh/treble/mediatek_ims/lib64/libsignal.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libsignal.so \
+    device/phh/treble/mediatek_ims/lib64/libsink.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libsink.so \
+    device/phh/treble/mediatek_ims/lib64/libsource.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libsource.so \
+    device/phh/treble/mediatek_ims/lib64/libvcodec_cap.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libvcodec_cap.so \
+    device/phh/treble/mediatek_ims/lib64/libvcodec_capenc.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libvcodec_capenc.so \
+    device/phh/treble/mediatek_ims/lib64/libvt_avsync.so:$(TARGET_COPY_OUT_SYSTEM)/lib64/libvt_avsync.so \
+    device/phh/treble/mediatek_ims/system_ext/lib/vendor.mediatek.hardware.videotelephony@1.0.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib/vendor.mediatek.hardware.videotelephony@1.0.so \
+    device/phh/treble/mediatek_ims/system_ext/lib/vendor.mediatek.hardware.mtkradioex@3.0.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib/vendor.mediatek.hardware.mtkradioex@3.0.so \
+    device/phh/treble/mediatek_ims/system_ext/lib64/vendor.mediatek.hardware.videotelephony@1.0.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.mediatek.hardware.videotelephony@1.0.so \
+    device/phh/treble/mediatek_ims/system_ext/lib64/vendor.mediatek.hardware.mtkradioex@3.0.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.mediatek.hardware.mtkradioex@3.0.so
+
 #Those overrides are here because Huawei's init read properties
 #from /system/etc/prop.default, then /vendor/build.prop, then /system/build.prop
 #So we need to set our props in prop.default
