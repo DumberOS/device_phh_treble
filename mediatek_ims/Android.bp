@@ -77,7 +77,8 @@ prebuilt_etc {
 
 android_app_import {
     name: "stock_mtk_telephony_assist_signed",
-    apk: "app/MtkTelephonyAssist.apk",
+    // Android 14 removed the SubscriptionController methods used by the stock APK.
+    apk: "app/MtkTelephonyAssist-patched.apk",
     certificate: "platform",
     privileged: true,
     dex_preopt: {

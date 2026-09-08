@@ -15,7 +15,9 @@ for i in wpa p2p;do
 	chown wifi:system /data/misc/wifi/${i}_supplicant.conf
 done
 
-if [ -f /vendor/bin/mtkmal ]; then
+vendor_model="$(getprop ro.product.vendor.model)"
+if [ -f /vendor/bin/mtkmal ] || [ "$vendor_model" = "Dumber mini" ] || \
+		[ "$vendor_model" = "S9" ]; then
 	if [ "$(getprop sys.phh.stock_mtk_ims)" = true ]; then
 		if [ "$(getprop persist.mtk_ims_support)" != 1 ] || \
 				[ "$(getprop persist.mtk_epdg_support)" != 1 ]; then
