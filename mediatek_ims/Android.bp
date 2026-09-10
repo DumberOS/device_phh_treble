@@ -23,7 +23,9 @@ genrule {
 
 android_app_import {
     name: "stock_mtk_ims_service_signed",
-    apk: "app/ImsService.apk",
+    // Skip native VT network updates when media.VTS is unavailable. Otherwise
+    // the shared ConnectivityThread blocks and IMS bearer teardown cannot finish.
+    apk: "app/ImsService-patched.apk",
     certificate: "platform",
     privileged: true,
     enforce_uses_libs: false,
