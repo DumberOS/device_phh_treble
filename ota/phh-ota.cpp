@@ -155,18 +155,32 @@ int main(int argc, char **argv) {
 		}
 
 		std::string blockDev;
-		fprintf(stderr, "Mapping backing image returned %s\n", imgManager->MapImageDevice(imageName, 0ms, &blockDev) ? "true" : "false");
+		bool mapped = imgManager->MapImageDevice(imageName, 10s, &blockDev);
+		fprintf(stderr, "Mapping backing image returned %s\n", mapped ? "true" : "false");
 		fprintf(stderr, "blockdev is %s\n", blockDev.c_str());
 		printf("%s\n", blockDev.c_str());
+		if(!mapped || blockDev.empty()) {
+			writeImageError("Failed to map OTA image.");
+			imgManager->UnmapImageDevice(imageName);
+			imgManager->DeleteBackingImage(imageName);
+			return -1;
+		}
 
-		struct stat sb;
+		struct stat sb = {};
+		bool foundBlockDev = false;
 		for(int i=0; i<10; i++) {
-			if(!stat(blockDev.c_str(), &sb)) break;
+			if(!stat(blockDev.c_str(), &sb)) {
+				foundBlockDev = true;
+				break;
+			}
 			sleep(1);
 		}
 
-		if(!S_ISBLK(sb.st_mode)) {
+		if(!foundBlockDev || !S_ISBLK(sb.st_mode)) {
 			fprintf(stderr, "blockDev wasn't block dev\n");
+			writeImageError("Mapped OTA image is not a block device.");
+			imgManager->UnmapImageDevice(imageName);
+			imgManager->DeleteBackingImage(imageName);
 			return -1;
 		}
 
