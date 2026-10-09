@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="eu.dumbdroid.overlay.androidauto">
+    <application android:hasCode="false" />
+    <overlay android:targetPackage="android" android:priority="1337" android:isStatic="true" />
+</manifest>

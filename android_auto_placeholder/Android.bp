@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: Apache-2.0
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+android_app {
+    name: "AndroidAutoPlaceholder",
+    product_specific: true,
+    privileged: true,
+    sdk_version: "current",
+    // Use the normal app signing key, including release signing via sign_target_files_apks.
+    // PackageManager reads this certificate from the factory package; it is not hardcoded.
+    dex_preopt: {
+        enabled: false,
+    },
+}

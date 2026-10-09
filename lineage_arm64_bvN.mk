@@ -44,6 +44,11 @@ PRODUCT_PACKAGES += package_filter
 
 PRODUCT_PACKAGES += GmsCore GsfProxy FakeStore more_apps import_contacts
 
+# Reserve Android Auto's privileged package without shipping Google's APK.
+PRODUCT_PACKAGES += AndroidAutoPlaceholder MicroGAndroidAutoOverlay
+PRODUCT_COPY_FILES += \
+    device/phh/treble/permissions/privapp-permissions-com.google.android.projection.gearhead.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/privapp-permissions-com.google.android.projection.gearhead.xml
+
 #PRODUCT_PACKAGES += ImsApp
 
 PRODUCT_SYSTEM_PROPERTIES += \
