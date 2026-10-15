@@ -1,4 +1,8 @@
 persist.sys.sf.hs_mode         u:object_r:sf_hs_mode_prop:s0
+phh.ota.cancel                u:object_r:phh_ota_prop:s0 exact bool
+phh.ota.adaptive_pacing       u:object_r:phh_ota_prop:s0 exact bool
+phh.ota.error                 u:object_r:phh_ota_prop:s0 exact string
+phh.ota.progress              u:object_r:phh_ota_prop:s0 exact int
 sys.phh.stock_mtk_ims          u:object_r:phh_stock_mtk_ims_prop:s0 exact bool
 hwc.exynos.vsync_mode      u:object_r:vendor_hwc_prop:s0
 ro.vendor.mtk_cta_set      u:object_r:system_mtk_cta_set_prop:s0

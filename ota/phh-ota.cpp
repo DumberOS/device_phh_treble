@@ -45,7 +45,12 @@ std::string getNextSlot() {
 }*/
 
 void writeProgress(uint64_t current, uint64_t total) {
-	android::base::SetProperty("phh.ota.progress", std::to_string(100 * current / total));
+	static int last_percent = -1;
+	int percent = 100 * current / total;
+	if (percent != last_percent) {
+		android::base::SetProperty("phh.ota.progress", std::to_string(percent));
+		last_percent = percent;
+	}
 }
 
 void writeImageError(std::string error) {
@@ -145,11 +150,24 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Unmapping backing image returned %s\n", imgManager->UnmapImageDevice(imageName) ? "true" : "false");
 		fprintf(stderr, "Deleting backing image returned %s\n", imgManager->DeleteBackingImage(imageName) ? "true" : "false");
 		
-		auto backRes = imgManager->CreateBackingImage(imageName, 2300*1024*1024LL, IImageManager::CREATE_IMAGE_DEFAULT, [](uint64_t c, uint64_t t){ writeProgress(c, t); return true; });
+		const bool adaptivePacing = android::base::GetBoolProperty("phh.ota.adaptive_pacing", true);
+		log_kmsg(adaptivePacing ? "OTA image preparation: adaptive pacing enabled"
+		                       : "OTA image preparation: adaptive pacing disabled (legacy fiemap)");
+		auto backRes = imgManager->CreateBackingImage(
+			imageName, 2300*1024*1024LL,
+			adaptivePacing ? IImageManager::CREATE_IMAGE_ADAPTIVE_PACING : IImageManager::CREATE_IMAGE_DEFAULT,
+			[](uint64_t c, uint64_t t) {
+				writeProgress(c, t);
+				return !android::base::GetBoolProperty("phh.ota.cancel", false);
+			});
 		if(backRes.is_ok()) {
 			fprintf(stderr, "Creating system image succeeded\n");
 		} else {
-			writeImageError(backRes.string());
+			if (backRes.error_code() == android::fiemap::FiemapStatus::ErrorCode::TIMED_OUT) {
+				writeImageError("Image creation paused too long under system pressure. Please retry.");
+			} else {
+				writeImageError(backRes.string());
+			}
 			fprintf(stderr, "Creating system image failed\n");
 			return -1;
 		}

@@ -1,0 +1,11 @@
+# The Updater and native helper coordinate preparation and cancellation.
+system_internal_prop(phh_ota_prop)
+set_prop(system_app, phh_ota_prop)
+set_prop(phhsu_daemon, phh_ota_prop)
+get_prop(shell, phh_ota_prop)
+userdebug_or_eng(`
+    set_prop(shell, phh_ota_prop)
+    set_prop(su, phh_ota_prop)
+')
+
+allow phhsu_daemon { proc_meminfo proc_pressure_io proc_pressure_mem }:file r_file_perms;
