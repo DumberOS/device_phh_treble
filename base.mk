@@ -126,7 +126,8 @@ PRODUCT_COPY_FILES += \
 #   vendor/etc
 PRODUCT_COPY_FILES += \
 	device/phh/treble/nfc/libnfc-nci.conf:system/phh/libnfc-nci-oreo.conf \
-	device/phh/treble/nfc/libnfc-nci-huawei.conf:system/phh/libnfc-nci-huawei.conf
+	device/phh/treble/nfc/libnfc-nci-huawei.conf:system/phh/libnfc-nci-huawei.conf \
+	device/phh/treble/nfc/libnfc-tms_RF-dumber.conf:system/phh/libnfc-tms_RF-dumber.conf
 
 # Advertise NFC features so Settings/NfcAdapter expose NFC controls.
 PRODUCT_COPY_FILES += \

@@ -70,6 +70,13 @@ case "$(getprop ro.product.vendor.model)" in
     "Dumber mini"|"S9")
         resetprop_phh ro.sf.lcd_density 210
         resetprop_phh persist.sys.phh.touch_recovery_on_wake 1
+        if [ -f /system/phh/libnfc-tms_RF-dumber.conf ] && [ -f /vendor/etc/libnfc-tms_RF.conf ]; then
+            if ! mount -o bind /system/phh/libnfc-tms_RF-dumber.conf /vendor/etc/libnfc-tms_RF.conf; then
+                log -p e -t PHH "Failed to mount Dumber mini NFC RF configuration"
+            fi
+        else
+            log -p w -t PHH "Missing Dumber mini NFC RF configuration source or target"
+        fi
         ;;
 esac
 
