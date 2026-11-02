@@ -309,7 +309,24 @@ mount -t tmpfs -o rw,nodev,relatime,mode=755,gid=0 none /mnt/phh || true
 mkdir /mnt/phh/empty_dir
 
 STOCK_MTK_IMS_FLAG="$PHH_STATE_DIR/dumber_mini_stock_ims"
+STOCK_MTK_IMS_DEFAULT_INITIALIZED="$PHH_STATE_DIR/stock_mtk_ims_default_initialized"
 STOCK_MTK_IMS_STAGE=/system/etc/phh/stock_mtk_ims
+
+# Initialize the new default once, including on OTA upgrades. Settings still
+# creates/removes the selection flag; the separate marker preserves later opt-outs.
+stock_mtk_ims_model="$(getprop ro.product.vendor.model | tr '[:upper:]' '[:lower:]' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+case "$stock_mtk_ims_model" in
+    "dumber mini"|"s9")
+        if [ ! -f "$STOCK_MTK_IMS_DEFAULT_INITIALIZED" ]; then
+            if { [ -f "$STOCK_MTK_IMS_FLAG" ] || touch "$STOCK_MTK_IMS_FLAG"; } && \
+                    touch "$STOCK_MTK_IMS_DEFAULT_INITIALIZED"; then
+                log -t PHH "Initialized stock MTK IMS default"
+            else
+                log -p e -t PHH "Failed to initialize stock MTK IMS default; will retry next boot"
+            fi
+        fi
+        ;;
+esac
 
 stock_mtk_ims_targets='/system/priv-app/ImsService
 /system/priv-app/MtkGbaService
