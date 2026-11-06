@@ -516,6 +516,9 @@ fi
 
 resetprop_phh ro.debuggable 0
 
+# Publish DumberOS build metadata without enabling PHH secure mode.
+. /system/bin/dumberos-build-properties.sh
+
 for abi in "" 64;do
     f=/vendor/lib$abi/libstagefright_foundation.so
     if [ -f "$f" ];then
@@ -545,7 +548,6 @@ if getprop ro.omc.build.version |grep -qE .;then
 	done
 fi
 
-resetprop_phh service.adb.root 0
 
 resetprop_phh ro.bluetooth.library_name libbluetooth.so
 

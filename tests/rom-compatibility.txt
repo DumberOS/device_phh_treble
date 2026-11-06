@@ -1,0 +1,122 @@
+DumberOS ROM compatibility changes
+=================================
+
+Scope
+-----
+The recovered First Direct 6.00.0 rules userdebug_detection v17 and the
+LineageOS branch of android_custom_rom v74. CalyxOS and other detectors are
+not covered. This does not establish hardware attestation or an overall
+banking-app security verdict.
+
+Build and runtime behavior
+--------------------------
+Keep lunch's userdebug variant. ANDROID_DEBUGGABLE remains enabled; the
+existing liblog implementation retains ADB debug capability at compile time.
+
+rw-system.sh sources dumberos-build-properties.sh during post-fs, before app
+startup. It reports build type user, tags release-keys, DumberOS display/flavor
+branding, and a user flavor suffix. It changes no fingerprint, device identity,
+patch date, verified-boot status, authentication setting, or ADB state. The
+existing ro.debuggable=0 behavior is retained. The PHH secure marker is not
+enabled by this implementation.
+
+Use adb root for development and adb unroot before app tests. The former
+unconditional service.adb.root rewrite was removed so adbd owns that state.
+
+The three debug init files have new installed/source names with identical
+contents and original installation conditions:
+  atrace_userdebug.rc -> atrace_dumberos.rc
+  bootstat-debug.rc -> bootstat-dumberos.rc
+  llkd-debuggable.rc -> llkd-dumberos.rc
+
+Lineage framework jar/resource filenames use org.dumberos.platform, while
+logical module names, Java namespaces, Android package identities, resource
+IDs, and permission XML contents remain unchanged. Resource loaders and
+classpath/dexpreopt paths use the new files. XML/init/addon installation names
+were updated through their owning modules. CleanSpec steps remove obsolete
+installed copies during incremental builds; no old-path aliases are installed.
+
+ROM metadata properties move to ro.dumberos.* (including
+ro.dumberos.legal.url). Build-target identity uses the existing ro.build.product (the same TARGET_DEVICE
+as the removed custom property);
+no custom device property is published. Producers, bundled readers, version reporting, updater,
+debuggerd, SDK, and build helpers are updated. Existing external apps/tools that
+read the old property names directly may require updates. Old names are read
+only as an upgrade/recovery compatibility fallback, not republished.
+Backup scripts migrate a preserved 50-lineage.sh to 50-dumberos.sh.
+
+Build verification
+------------------
+  source build/envsetup.sh
+  lunch lineage_vanilla31-ap2a-userdebug
+  m nothing -j4
+
+Use the project's normal full signed-image build when sufficient disk space
+is available. A graph-only build or selected metadata targets do not produce
+a usable new system image. Validate a clean image as well as incremental output.
+
+Host regressions:
+  python3 -m unittest discover -s device/phh/treble/tests -p test_rom_compatibility.py -v
+  python3 -m unittest discover -s device/phh/treble/tests -p test_stock_mtk_ims_default.py -v
+
+Soong dexpreopt regression package (after bootstrapping Soong):
+  prebuilts/build-tools/linux-x86/bin/ninja -f out/soong/bootstrap.ninja -j2 out/host/linux-x86/bin/go/soong-dexpreopt/test/test
+  out/host/linux-x86/bin/go/soong-dexpreopt/test/test -test.v
+
+Image inventory audit (also accepts a fully extracted image root):
+  python3 device/phh/treble/tests/audit_rom_compatibility.py --image-root out/target/product/tdgsi_arm64_ab
+
+This audit fails on known paths, including dangling symlinks, and requires
+the core replacement files. Without a runtime property capture it explicitly
+reports those checks as not run. It is not an app-namespace execution test.
+
+Device acceptance, after building/flashing through the normal workflow
+---------------------------------------------------------------------
+1. Verify normal boot, Settings, framework resources and overlays, Lineage
+   services, tracing permissions, bootstat and any enabled watchdog.
+2. Test adb root, adb unroot, adb root and a reboot. Verify actual shell UID
+   agrees with service.adb.root and confirm ADB authentication still works.
+3. Run adb unroot, then capture: adb shell getprop > /tmp/dumberos-getprop.txt
+   Repeat the inventory audit with --properties /tmp/dumberos-getprop.txt.
+4. Check properties from an ordinary app process and file visibility using
+   direct ARM64 faccessat/newfstatat syscalls. Shell/root observations alone
+   do not establish the app's view.
+5. Clear First Direct storage and launch fresh, then repeat after reboot.
+   Do not count a force-stop workaround as success. Inspect detector results
+   for userdebug/Lineage/ADB and report CalyxOS separately.
+
+Validation recorded during implementation (2026-11-05)
+------------------------------------------------------
+Passed: m nothing for lineage_vanilla31-ap2a-userdebug; 19 isolated dexpreopt
+tests including location override regression; six compatibility host tests;
+nine existing IMS boot-script tests; shell syntax; Android init verifier for
+all three renamed scripts; unchanged init-file contents; git diff --check.
+Built: renamed atrace/bootstat init files, metadata helper, property contexts,
+and systemserver classpath metadata (verified new jar path).
+
+The broader bootstrap test target encounters a failure in the untouched
+TestValidateSafePath suite; the isolated dexpreopt package passes.
+Full framework/image compilation and clean-image validation remain pending:
+the filesystem had approximately 3.4 GB free. No device was connected, so
+no boot, ADB-state transition, ordinary-app probe, or banking-app acceptance
+result is claimed. Existing system.img is not a newly validated image.
+
+CalyxOS package detection follow-up (2026-11-05)
+------------------------------------------------
+The flashed image passed the prior Lineage/userdebug checks, but the SDK's
+CalyxOS branch also checks PackageManager.getPackageInfo for known package IDs.
+The remaining match was org.calyxos.backup.contacts (Seedvault LocalContactsBackup).
+This component now uses org.dumberos.backup.contacts throughout its manifest,
+code, Gradle application ID/namespace, default permissions, and Seedvault UI.
+The app keeps its backup agent and boot receiver. ContactsProvider data is not
+renamed. Existing Seedvault archives identify the former backup agent by its
+old package ID; automatic restoration of those older contact-backup entries
+has not been migrated or validated. Per the 2026-11-06 product decision, ship
+the new identity without a legacy recovery migration; handle specific legacy
+recovery cases separately if reported. Make a fresh backup after upgrading.
+
+The image pipeline now runs the audit with --aapt2 to inspect APK manifests.
+It rejects every package in the decoded CalyxOS package list and requires the
+new contacts-backup package. Renaming an APK file cannot satisfy this audit.
+Other CalyxOS property/path probes and the app's overall verdict still require
+runtime verification. Previous audit results above are historical.
