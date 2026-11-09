@@ -70,6 +70,16 @@ case "$(getprop ro.product.vendor.model)" in
     "Dumber mini"|"S9")
         resetprop_phh ro.sf.lcd_density 210
         resetprop_phh persist.sys.phh.touch_recovery_on_wake 1
+        # Apply the manufacturer's ST7123 ghost-touch fix before Android input
+        # starts. The helper preserves installed version 3 or newer and checks
+        # the live version after updating; a marker alone could hide a failure.
+        if [ -c /dev/sitronixDev ]; then
+            if touch_update_log="$(/system/bin/sh /system/bin/dumber-mini-touch-update.sh 2>&1)"; then
+                log -t PHH "$touch_update_log"
+            else
+                log -p e -t PHH "ST7123 firmware update failed: $touch_update_log"
+            fi
+        fi
         if [ -f /system/phh/libnfc-tms_RF-dumber.conf ] && [ -f /vendor/etc/libnfc-tms_RF.conf ]; then
             if ! mount -o bind /system/phh/libnfc-tms_RF-dumber.conf /vendor/etc/libnfc-tms_RF.conf; then
                 log -p e -t PHH "Failed to mount Dumber mini NFC RF configuration"

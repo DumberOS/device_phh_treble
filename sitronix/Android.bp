@@ -1,0 +1,12 @@
+cc_prebuilt_binary {
+    name: "st7123-vendor-tool",
+    srcs: ["ST_7123_Tool_ARM"],
+    compile_multilib: "32",
+    // Manufacturer's static ARM/Linux utility; keep its tested bytes intact.
+    check_elf_files: false,
+    strip: { none: true },
+    enabled: false,
+    arch: {
+        arm: { enabled: true },
+    },
+}
