@@ -136,6 +136,12 @@ PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.nfc.hcef.xml:system/etc/permissions/android.hardware.nfc.hcef.xml \
 	frameworks/native/data/etc/android.hardware.nfc.uicc.xml:system/etc/permissions/android.hardware.nfc.uicc.xml
 
+# Dumber mini/S9 manufacturer touchscreen fix; rw-system.sh gates application.
+PRODUCT_PACKAGES += st7123-vendor-tool
+PRODUCT_COPY_FILES += \
+    device/phh/treble/sitronix/7123.dump:$(TARGET_COPY_OUT_SYSTEM)/etc/firmware/dumber-mini/7123.dump \
+    device/phh/treble/sitronix/dumber-mini-touch-update.sh:$(TARGET_COPY_OUT_SYSTEM)/bin/dumber-mini-touch-update.sh
+
 # LineageOS build may need this to make NFC work
 PRODUCT_PACKAGES += \
         NfcNci \
