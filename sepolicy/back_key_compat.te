@@ -1,0 +1,9 @@
+# Give Settings access to the Back-dispatch switch without granting access to
+# the other persist.wm.debug properties. Framework consumers read it at startup.
+system_restricted_prop(dumberos_predictive_back_prop)
+set_prop(system_app, dumberos_predictive_back_prop)
+get_prop(appdomain, dumberos_predictive_back_prop)
+get_prop(system_server, dumberos_predictive_back_prop)
+get_prop(zygote, dumberos_predictive_back_prop)
+get_prop(shell, dumberos_predictive_back_prop)
+userdebug_or_eng(`set_prop(shell, dumberos_predictive_back_prop)')

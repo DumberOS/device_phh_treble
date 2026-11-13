@@ -15,6 +15,10 @@ ro.boot.realme.lockstate=0
 #Fixes fingerprint unlock delay
 persist.wm.enable_remote_keyguard_animation=0
 
+# Let keypad IMEs such as TT9 handle Back before app navigation callbacks.
+# Settings > System > Buttons can override this; changes require a reboot.
+persist.wm.debug.predictive_back=0
+
 # Enable support of one-handed mode
 ro.support_one_handed_mode=true
 

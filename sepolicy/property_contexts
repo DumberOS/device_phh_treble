@@ -1,4 +1,6 @@
 persist.sys.sf.hs_mode         u:object_r:sf_hs_mode_prop:s0
+# Only this Back-dispatch property is writable by the Buttons settings screen.
+persist.wm.debug.predictive_back u:object_r:dumberos_predictive_back_prop:s0 exact bool
 phh.ota.cancel                u:object_r:phh_ota_prop:s0 exact bool
 phh.ota.adaptive_pacing       u:object_r:phh_ota_prop:s0 exact bool
 phh.ota.error                 u:object_r:phh_ota_prop:s0 exact string
