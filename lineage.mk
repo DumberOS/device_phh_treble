@@ -27,4 +27,5 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_PACKAGES += tt9
 PRODUCT_PACKAGES += DumbdroidUpdater DumbdroidPanel DumbdroidDonationLink DumbdroidAdmin DumbdroidBugreportUploader
+PRODUCT_PACKAGES += KeyNavigator
 PRODUCT_PACKAGES += TrebleDisableAutoPowerModes

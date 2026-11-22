@@ -1,0 +1,23 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dumbermini.keynavigator.probe">
+    <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="34" />
+    <queries>
+        <package android:name="com.bankid.bus" />
+        <package android:name="se.bankgirot.swish" />
+    </queries>
+    <application android:label="BankID adapter test probe" android:allowBackup="false" />
+    <instrumentation android:name=".DeviceProbe"
+        android:targetPackage="com.dumbermini.keynavigator.probe" />
+    <instrumentation android:name=".SettingsProbe"
+        android:targetPackage="com.dumbermini.keynavigator.probe" />
+    <instrumentation android:name=".StructureProbe"
+        android:targetPackage="com.dumbermini.keynavigator.probe" />
+    <instrumentation android:name=".ScrollProbe"
+        android:targetPackage="com.dumbermini.keynavigator.probe" />
+    <instrumentation android:name=".DrawerProbe"
+        android:targetPackage="com.dumbermini.keynavigator.probe" />
+    <instrumentation android:name=".KeypadLabelsProbe"
+        android:targetPackage="com.dumbermini.keynavigator.probe" />
+    <instrumentation android:name="com.dumbermini.keynavigator.WisePinProbe"
+        android:targetPackage="com.dumbermini.keynavigator.probe" />
+</manifest>

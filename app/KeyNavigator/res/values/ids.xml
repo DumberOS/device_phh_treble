@@ -1,0 +1,9 @@
+<resources>
+    <item type="id" name="app_search" />
+    <item type="id" name="app_list" />
+    <item type="id" name="app_label" />
+    <item type="id" name="app_package" />
+    <item type="id" name="app_toggle" />
+    <item name="service_toggle" type="id" />
+    <item name="overflow_menu" type="id" />
+</resources>

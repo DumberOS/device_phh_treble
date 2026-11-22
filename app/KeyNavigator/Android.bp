@@ -1,0 +1,18 @@
+android_app {
+    name: "KeyNavigator",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    manifest: "AndroidManifest.xml",
+    privileged: true,
+    required: ["privapp-permissions-com.dumbermini.keynavigator"],
+    sdk_version: "current",
+    min_sdk_version: "26",
+    target_sdk_version: "34",
+}
+
+prebuilt_etc {
+    name: "privapp-permissions-com.dumbermini.keynavigator",
+    src: "permissions/privapp-permissions-com.dumbermini.keynavigator.xml",
+    sub_dir: "permissions",
+    filename_from_src: true,
+}

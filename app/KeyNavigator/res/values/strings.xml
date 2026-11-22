@@ -1,0 +1,20 @@
+<resources>
+    <string name="key_navigation_title">Key navigation</string>
+    <string name="settings_summary">Navigate selected apps with physical keys</string>
+    <string name="use_key_navigation">Use key navigation</string>
+    <string name="app_name">Key Navigator</string>
+    <string name="service_description">Use physical keys in BankID and Wise PIN screens, and standard navigation in the apps you enable in Key Navigator. D-pad arrows move a highlight between visible controls and centre activates the highlighted control. D-pad Up and Down automatically scroll near list edges. Keys 2 and 5 move up and down without scrolling. BankID uses specialised reading and PIN controls. Wise has specialised PIN controls. No PIN or field contents are stored or logged.</string>
+    <string name="instructions">Enable physical-key controls for chosen apps.\nD-pad arrows: move the blue highlight\nD-pad centre: activate the highlighted control\n2: move up without scrolling\n5: move down without scrolling\nBack and typing work normally. When any text field has input focus, 2 and 5 pass through for normal typing and T9\n\nWise and BankID have enabled PIN entry using physical keys regardless of their toggle. Get in touch at support@dumbermini.com to request physical PIN input support in your app or to report an issue.</string>
+    <string name="open_settings">Accessibility settings</string>
+    <string name="controls_help">Help</string>
+    <string name="search_apps">Search apps</string>
+    <string name="loading_apps">Loading apps…</string>
+    <string name="no_apps">No matching apps</string>
+    <string name="app_controls">Standard navigation for %1$s</string>
+    <plurals name="app_count">
+        <item quantity="one">Apps · %d</item>
+        <item quantity="other">Apps · %d</item>
+    </plurals>
+    <string name="wise_action_failed">Wise did not accept that key.</string>
+    <string name="action_failed">BankID did not accept that key. Use its on-screen controls.</string>
+</resources>

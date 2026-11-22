@@ -1,0 +1,44 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dumbermini.keynavigator" android:versionCode="19" android:versionName="0.19">
+    <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="34" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+    <application android:label="@string/app_name" android:allowBackup="false"
+        android:icon="@android:drawable/ic_menu_sort_alphabetically"
+        android:theme="@style/Theme.KeyNavigation">
+        <activity android:name=".SetupActivity" android:exported="true"
+            android:label="@string/key_navigation_title" android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.category" android:value="com.android.settings.category.ia.apps" />
+            <meta-data android:name="com.android.settings.title" android:resource="@string/key_navigation_title" />
+            <meta-data android:name="com.android.settings.summary" android:resource="@string/settings_summary" />
+            <meta-data android:name="com.android.settings.keyhint" android:value="key_navigation" />
+            <meta-data android:name="com.android.settings.order" android:value="16" />
+            <meta-data android:name="com.android.settings.icon_tintable" android:value="true" />
+        </activity>
+        <receiver android:name=".BootReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".BankIdKeyService" android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service" />
+        </service>
+    </application>
+</manifest>
