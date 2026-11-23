@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dumber mini/S9 fallback for features missing from their vendor image.
+     Keep outside etc/permissions until rw-system.sh verifies the device. -->
+<permissions>
+    <feature name="android.hardware.nfc" />
+    <feature name="android.hardware.nfc.any" />
+    <feature name="android.hardware.nfc.hce" />
+    <feature name="android.hardware.nfc.hcef" />
+    <feature name="android.hardware.nfc.uicc" />
+</permissions>

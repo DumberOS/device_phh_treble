@@ -80,6 +80,17 @@ case "$(getprop ro.product.vendor.model)" in
                 log -p e -t PHH "ST7123 firmware update failed: $touch_update_log"
             fi
         fi
+        # These models omit NFC features from vendor. Activate the fallback
+        # only with the TMS controller present, before Android reads features.
+        if [ -c /dev/tms_nfc ]; then
+            if [ -f /system/phh/permissions-dumber-nfc.xml ] && [ -f /system/etc/permissions/dumberos-nfc.xml ]; then
+                if ! mount -o bind /system/phh/permissions-dumber-nfc.xml /system/etc/permissions/dumberos-nfc.xml; then
+                    log -p e -t PHH "Failed to mount Dumber mini NFC feature declarations"
+                fi
+            else
+                log -p w -t PHH "Missing Dumber mini NFC feature declarations source or target"
+            fi
+        fi
         if [ -f /system/phh/libnfc-tms_RF-dumber.conf ] && [ -f /vendor/etc/libnfc-tms_RF.conf ]; then
             if ! mount -o bind /system/phh/libnfc-tms_RF-dumber.conf /vendor/etc/libnfc-tms_RF.conf; then
                 log -p e -t PHH "Failed to mount Dumber mini NFC RF configuration"
