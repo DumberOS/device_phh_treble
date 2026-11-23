@@ -43,7 +43,7 @@ updating it to version 0.2, the user confirmed that a physical digit appears in
 BankID's PIN field and Back deletes it. Service diagnostics confirmed a recognised
 12-button keypad and accepted clicks. The SDK and AOSP module builds pass, along
 with 81 adapter checks, 45 spatial-navigation checks, 25 app-policy checks, and
-56 scrolling checks, plus 13 accessibility configuration checks and 26 Wise keypad checks. Confirmation/signing and held-key behaviour have not yet been
+56 scrolling checks, plus 13 accessibility configuration checks and 37 Wise keypad checks and 14 Wise window-identity checks. Confirmation/signing and held-key behaviour have not yet been
 validated on the device. The earlier ordinary sideloaded install was blocked by
 BankID; the system app is accepted in this test.
 
@@ -192,16 +192,31 @@ priority, including digits 2/5.
 - **Delete / Forward Delete:** click Delete.
 - **Centre / Enter / numpad Enter:** click OK only when Wise enables it.
 
-The matcher is scoped to `com.transferwise.android`, its known container, the
-English “Enter your passcode” heading, and the complete observed 12-key Compose
-layout. Keys 1–9 must match their labels. The final row is Delete, 0, OK. At the
-phone's normal 210 dpi density, Compose clips the child labels/icons of that row
-but keeps the parent accessibility click actions. The adapter targets those
-parents without coordinate taps or persistent display changes. When icon labels
-are exposed, they must match Delete/OK. Unknown layouts pass through.
+The matcher is scoped to `com.transferwise.android`, the activity class
+`com.wise.ui.app_security.pin.PinEntryActivity`, its known container and the
+complete observed 12-key Compose layout. Android accessibility window-state
+events supply the activity class; its identity is tied to that window ID and
+invalidated when the window is removed or replaced. Another Wise activity with
+an identical numeric keypad does not qualify. No additional permission is needed.
 
-Only static heading/keycap text and the Delete/OK icon descriptions are read;
-the PIN indicator and editable values are not read or logged. Held keys act once.
+Keys 1–9 must match their numeric values, accepting Unicode decimal digits such
+as Arabic-Indic, Devanagari and full-width digits. The final row is Delete, 0, OK.
+At the phone's normal 210 dpi density, Compose clips the child labels/icons of
+that row but keeps the parent accessibility click actions. The adapter targets
+those parents without coordinate taps or persistent display changes.
+
+Only numeric keycap text is read. Headings, Delete/OK labels, content descriptions,
+the PIN indicator and editable values are not read or used for recognition.
+Changing translated wording therefore does not affect the matcher. Unknown
+activities, incomplete layouts and reordered digits are rejected. Held keys act once.
+
+**Version 0.20:** replaces the English heading and action-label checks with window
+identity. If the service is started/reconnected while the PIN screen is already
+open, leave and reopen that screen once so it reports its activity identity.
+Until then, custom Wise PIN handling is unavailable. The device diagnostic reports
+`Wise PIN activity confirmed` separately from keypad recognition. Host regressions
+cover translated headings/action labels, localized numerals, missing/wrong activity
+identities, and removed windows. This version still needs an on-device language-change test.
 
 **Version 0.19 validation:** temporarily fitting the entire screen at 160 dpi
 identified the bottom-row labels; the original density was restored. At normal

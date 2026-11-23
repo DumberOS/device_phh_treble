@@ -9,20 +9,21 @@ final class WisePinScreen implements AutoCloseable {
     private final Map<Keypad.Node, AccessibilityNodeInfo> nodes = new IdentityHashMap<>();
     WiseKeypad keypad;
 
-    static WisePinScreen read(AccessibilityNodeInfo root) {
+    static WisePinScreen read(AccessibilityNodeInfo root, String activityClass) {
         WisePinScreen screen = new WisePinScreen();
+        if (!WiseKeypad.PIN_ACTIVITY.equals(activityClass)) { root.recycle(); return screen; }
         try {
             Keypad.Node tree = screen.readNode(root, 0);
             WiseKeypad.Layout layout = WiseKeypad.layout(tree);
             if (layout != null) {
-                screen.readLabel(layout.heading);
-                // Read keycaps only after the static PIN heading has matched.
-                if (WiseKeypad.HEADING.equals(layout.heading.text.trim())) {
-                    for (Keypad.Node label : layout.labels) if (label != null) screen.readLabel(label);
-                    screen.readRole(layout.keys.get(9));
-                    screen.readRole(layout.keys.get(11));
-                    screen.keypad = WiseKeypad.match(tree);
+                // Only numeric keycaps: no heading, Delete/OK wording or PIN values.
+                for (int i = 0; i < 9; i++) {
+                    Keypad.Node label = layout.labels.get(i);
+                    if (label != null) screen.readLabel(label);
                 }
+                Keypad.Node zero = layout.labels.get(10);
+                if (zero != null) screen.readLabel(zero);
+                screen.keypad = WiseKeypad.match(tree, activityClass);
             }
             return screen;
         } catch (RuntimeException error) { screen.close(); throw error; }
@@ -50,13 +51,6 @@ final class WisePinScreen implements AutoCloseable {
     private void readLabel(Keypad.Node node) {
         AccessibilityNodeInfo info = nodes.get(node);
         if (!info.isEditable() && !info.isPassword()) node.text = value(info.getText());
-    }
-
-    private void readRole(Keypad.Node node) {
-        AccessibilityNodeInfo info = nodes.get(node);
-        if (info.isEditable() || info.isPassword()) return;
-        node.description = value(info.getContentDescription());
-        for (Keypad.Node child : node.children) readRole(child);
     }
 
     boolean click(Keypad.Node target) {

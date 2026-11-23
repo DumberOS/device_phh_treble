@@ -7,7 +7,7 @@ import java.util.List;
 final class WiseKeypad {
     static final String PACKAGE = "com.transferwise.android";
     static final String CONTAINER = PACKAGE + ":id/container";
-    static final String HEADING = "Enter your passcode";
+    static final String PIN_ACTIVITY = "com.wise.ui.app_security.pin.PinEntryActivity";
     final Keypad.Node[] digits = new Keypad.Node[10];
     final Keypad.Node delete;
     final Keypad.Node confirm;
@@ -25,7 +25,7 @@ final class WiseKeypad {
         final List<Keypad.Node> labels = new ArrayList<>();
     }
 
-    /** Structural candidates allow the reader to inspect only heading/keycap text. */
+    /** Structural candidates allow the reader to inspect only numeric keycaps. */
     static Layout layout(Keypad.Node root) {
         if (root == null || !PACKAGE.equals(root.packageName)) return null;
         List<Layout> found = new ArrayList<>();
@@ -61,28 +61,24 @@ final class WiseKeypad {
         for (Keypad.Node child : node.children) collect(child, inContainer, found);
     }
 
-    static WiseKeypad match(Keypad.Node root) {
+    static WiseKeypad match(Keypad.Node root, String activityClass) {
+        if (!PIN_ACTIVITY.equals(activityClass)) return null;
         Layout layout = layout(root);
-        if (layout == null || !layout.heading.visible || !HEADING.equals(layout.heading.text.trim())) return null;
+        if (layout == null || !layout.heading.visible) return null;
         for (int i = 0; i < 9; i++) {
             Keypad.Node key = layout.keys.get(i), label = layout.labels.get(i);
-            if (!key.enabled || label == null || !Integer.toString(i + 1).equals(label.text.trim())) return null;
+            if (!key.enabled || label == null || !isDigit(label.text, i + 1)) return null;
         }
         // Compose exposes the bottom row even when its rendered children are clipped
         // away. Never infer it from coordinates alone: require the complete PIN layout.
-        for (int i = 9; i < 12; i++) {
-            Keypad.Node label = layout.labels.get(i);
-            if (label != null && !label.text.trim().isEmpty()
-                    && !(i == 10 && "0".equals(label.text.trim()))) return null;
-        }
-        if (!knownRole(layout.keys.get(9), "Delete") || !knownRole(layout.keys.get(11), "OK")) return null;
+        Keypad.Node zeroLabel = layout.labels.get(10);
+        if (zeroLabel != null && !zeroLabel.text.trim().isEmpty() && !isDigit(zeroLabel.text, 0)) return null;
         if (!layout.keys.get(10).enabled) return null;
         return new WiseKeypad(layout);
     }
 
-    private static boolean knownRole(Keypad.Node key, String expected) {
-        if (!key.description.trim().isEmpty() && !expected.equals(key.description.trim())) return false;
-        for (Keypad.Node child : key.children) if (!knownRole(child, expected)) return false;
-        return true;
+    private static boolean isDigit(String text, int expected) {
+        String label = text.trim();
+        return label.codePointCount(0, label.length()) == 1 && Character.digit(label.codePointAt(0), 10) == expected;
     }
 }

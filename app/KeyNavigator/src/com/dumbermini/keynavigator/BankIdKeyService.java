@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 
 public final class BankIdKeyService extends AccessibilityService {
     private final KeyPresses presses = new KeyPresses();
+    private final WisePinWindow wisePinWindow = new WisePinWindow();
     private String lastResult = "Waiting for a key";
     private boolean readingGestureInProgress;
     private AppNavigator navigator;
@@ -34,12 +35,20 @@ public final class BankIdKeyService extends AccessibilityService {
     }
 
     @Override protected void onServiceConnected() {
+        wisePinWindow.reset();
         if (navigator != null) navigator.destroy();
         navigator = new AppNavigator(this, settings);
     }
 
     @Override public void onAccessibilityEvent(AccessibilityEvent event) {
         int type = event.getEventType();
+        if (type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            wisePinWindow.onWindowState(string(event.getPackageName()), string(event.getClassName()),
+                    event.getWindowId(), event.isFullScreen());
+        } else if (type == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                && (event.getWindowChanges() & AccessibilityEvent.WINDOWS_CHANGE_REMOVED) != 0) {
+            wisePinWindow.onWindowRemoved(event.getWindowId());
+        }
         if (navigator != null && type == AccessibilityEvent.TYPE_VIEW_FOCUSED) navigator.onInputFocusChanged();
         if (navigator != null && type == AccessibilityEvent.TYPE_VIEW_SCROLLED) navigator.onScrolled(event);
         if (navigator != null && (type == AccessibilityEvent.TYPE_WINDOWS_CHANGED
@@ -184,7 +193,8 @@ public final class BankIdKeyService extends AccessibilityService {
         AccessibilityNodeInfo root = focusedRoot();
         if (root == null) return false;
         if (!WiseKeypad.PACKAGE.contentEquals(root.getPackageName())) { root.recycle(); return false; }
-        try (WisePinScreen screen = WisePinScreen.read(root)) {
+        String activityClass = wisePinWindow.activityForWindow(string(root.getPackageName()), root.getWindowId());
+        try (WisePinScreen screen = WisePinScreen.read(root, activityClass)) {
             if (screen.keypad == null) { lastResult = "Wise PIN layout not recognised"; return false; }
             Keypad.Node target = digit >= 0 ? screen.keypad.digits[digit]
                     : delete ? screen.keypad.delete : screen.keypad.confirm;
@@ -303,8 +313,10 @@ public final class BankIdKeyService extends AccessibilityService {
                 return;
             }
             if (WiseKeypad.PACKAGE.equals(string(root.getPackageName()))) {
-                try (WisePinScreen screen = WisePinScreen.read(root)) {
+                String activityClass = wisePinWindow.activityForWindow(string(root.getPackageName()), root.getWindowId());
+                try (WisePinScreen screen = WisePinScreen.read(root, activityClass)) {
                     writer.println("Current window: Wise");
+                    writer.println("Wise PIN activity confirmed: " + !activityClass.isEmpty());
                     writer.println("Wise keypad recognised: " + (screen.keypad != null));
                     if (screen.keypad != null) writer.println("Wise Delete enabled: " + screen.keypad.delete.enabled);
                 }

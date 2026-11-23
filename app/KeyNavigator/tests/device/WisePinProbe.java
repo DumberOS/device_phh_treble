@@ -4,9 +4,13 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Instrumentation;
 import android.app.UiAutomation;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 
 /** Explicitly opted-in single digit/delete test; checks Delete state, never PIN text. */
 public final class WisePinProbe extends Instrumentation {
@@ -64,6 +68,7 @@ public final class WisePinProbe extends Instrumentation {
     }
 
     private WisePinScreen screen() {
+        require(pinActivityResumed(), "Wise PIN activity is not resumed");
         AccessibilityNodeInfo root = null;
         for (AccessibilityWindowInfo window : automation.getWindows()) {
             try {
@@ -75,9 +80,23 @@ public final class WisePinProbe extends Instrumentation {
         if (!WiseKeypad.PACKAGE.contentEquals(root.getPackageName())) {
             root.recycle(); throw new IllegalStateException("Wise is no longer foreground");
         }
-        WisePinScreen screen = WisePinScreen.read(root);
+        WisePinScreen screen = WisePinScreen.read(root, WiseKeypad.PIN_ACTIVITY);
         if (screen.keypad == null) { screen.close(); throw new IllegalStateException("Unknown Wise PIN layout"); }
         return screen;
+    }
+
+    private boolean pinActivityResumed() {
+        // This test-only shell query confirms activity metadata without needing to
+        // wait for a new window event. The production service uses accessibility events.
+        String component = WiseKeypad.PACKAGE + "/" + WiseKeypad.PIN_ACTIVITY;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new ParcelFileDescriptor.AutoCloseInputStream(
+                        automation.executeShellCommand("dumpsys activity activities"))))) {
+            String line;
+            while ((line = reader.readLine()) != null)
+                if (line.trim().startsWith("topResumedActivity=")) return line.contains(" " + component + " ");
+        } catch (IOException error) { throw new IllegalStateException("Cannot confirm resumed activity", error); }
+        return false;
     }
 
     private boolean waitDelete(boolean enabled) {

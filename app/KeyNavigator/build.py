@@ -29,13 +29,15 @@ def main():
         package / "ScrollNavigation.java", ROOT / "tests/AdapterTest.java", ROOT / "tests/SpatialNavigationTest.java",
         ROOT / "tests/AppPolicyTest.java", ROOT / "tests/ScrollNavigationTest.java",
         package / "ServiceList.java", ROOT / "tests/ServiceListTest.java",
-        package / "WiseKeypad.java", ROOT / "tests/WiseKeypadTest.java")
+        package / "WiseKeypad.java", ROOT / "tests/WiseKeypadTest.java",
+        package / "WisePinWindow.java", ROOT / "tests/WisePinWindowTest.java")
     run("java", "-cp", BUILD / "tests", "com.dumbermini.keynavigator.AdapterTest")
     run("java", "-cp", BUILD / "tests", "com.dumbermini.keynavigator.SpatialNavigationTest")
     run("java", "-cp", BUILD / "tests", "com.dumbermini.keynavigator.AppPolicyTest")
     run("java", "-cp", BUILD / "tests", "com.dumbermini.keynavigator.ScrollNavigationTest")
     run("java", "-cp", BUILD / "tests", "com.dumbermini.keynavigator.ServiceListTest")
     run("java", "-cp", BUILD / "tests", "com.dumbermini.keynavigator.WiseKeypadTest")
+    run("java", "-cp", BUILD / "tests", "com.dumbermini.keynavigator.WisePinWindowTest")
     run(TOOLS / "aapt2", "compile", "--dir", ROOT / "res", "-o", BUILD / "resources.zip")
     run(TOOLS / "aapt2", "link", "-o", BUILD / "resources.apk", "-I", ANDROID,
         "--manifest", ROOT / "AndroidManifest.xml", "--java", BUILD / "generated",
