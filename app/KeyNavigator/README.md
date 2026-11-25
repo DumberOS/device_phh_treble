@@ -43,7 +43,7 @@ updating it to version 0.2, the user confirmed that a physical digit appears in
 BankID's PIN field and Back deletes it. Service diagnostics confirmed a recognised
 12-button keypad and accepted clicks. The SDK and AOSP module builds pass, along
 with 81 adapter checks, 45 spatial-navigation checks, 25 app-policy checks, and
-56 scrolling checks, plus 13 accessibility configuration checks and 37 Wise keypad checks and 14 Wise window-identity checks. Confirmation/signing and held-key behaviour have not yet been
+78 scrolling checks, plus 13 accessibility configuration checks and 37 Wise keypad checks and 14 Wise window-identity checks. Confirmation/signing and held-key behaviour have not yet been
 validated on the device. The earlier ordinary sideloaded install was blocked by
 BankID; the system app is accepted in this test.
 
@@ -63,6 +63,24 @@ elements. Swish field text and content descriptions are never read by the inspec
 
 Version 0.5 adds spatial navigation. The user confirmed that the physical D-pad
 moves the highlight and Centre activates controls on the device.
+
+Version 0.21 excludes horizontal legacy ViewPagers from vertical auto-scrolling.
+Swish's obfuscated pager exposes only generic Forward/Backward actions; Down
+previously invoked Forward and changed its page without updating the selected
+bottom tab. Its stable package/resource ID identifies that pager, while standard
+legacy ViewPager classes are recognised across apps. Vertical lists within tabs
+remain scrollable. ViewPager2 is not classified by name because it also supports
+vertical paging. A device probe reproduced the sideways page change and restored
+the original page; regression checks cover horizontal exclusion and nested lists.
+
+Version 0.22 bases downward row jumps on the first fully visible row, comparing
+its clipped screen height with its height in its parent. Gmail can leave a clipped
+header or email above the row it aligned: advancing from that clipped row repeatedly
+requested the same position, accepted without any movement. Device probes confirmed
+that advancing from the first complete row moves one email at a time. Upward jumps
+still target the row before the first visible row; missing complete-row geometry
+falls back to ordinary scrolling. The fix applies to all eligible single-column
+lists, without Gmail-specific IDs.
 
 Version 0.7 adds ancestor-list scrolling. The user confirmed in Gmail that 5 scrolls
 down, 2 scrolls up, and the highlight stays inside the message list in both directions.

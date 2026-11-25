@@ -4,6 +4,17 @@ import java.util.List;
 
 /** Picks the closest vertical ancestor; reaching its boundary never scrolls an outer list. */
 final class ScrollNavigation {
+    static boolean horizontalPager(String packageName, String viewId, String className) {
+        // Legacy ViewPager exposes FORWARD/BACKWARD rather than an axis. Swish
+        // obfuscates its class, but its observed horizontal pager has a stable ID.
+        // Do not include ViewPager2: it also supports vertical paging.
+        return "androidx.viewpager.widget.ViewPager".equals(className)
+                || "android.support.v4.view.ViewPager".equals(className)
+                || "com.android.internal.widget.ViewPager".equals(className)
+                || ("se.bankgirot.swish".equals(packageName)
+                        && "se.bankgirot.swish:id/view_pager".equals(viewId));
+    }
+
     static boolean needsTouchScroll(String packageName, String viewId) {
         return "ch.protonmail.android".equals(packageName) && "MailboxList".equals(viewId);
     }
@@ -70,15 +81,22 @@ final class ScrollNavigation {
         return -1;
     }
 
+    static boolean completeRowHeight(int visibleHeight, int fullHeight) {
+        return fullHeight > 0 && visibleHeight >= fullHeight;
+    }
+
     /** One-row jumps retain overlap; missing, single-row, or reversed metadata falls back. */
-    static int adjacentRow(int first, int last, int rowCount, boolean down) {
+    static int adjacentRow(int first, int last, int firstComplete, int rowCount, boolean down) {
         if (first < 0 || last <= first || last >= rowCount) return -1;
-        int target = first + (down ? 1 : -1);
+        // A clipped leading row can remain above the row already aligned by the app.
+        // Advancing from it would request the same position on every Down press.
+        if (down && (firstComplete < first || firstComplete > last)) return -1;
+        int target = down ? firstComplete + 1 : first - 1;
         return target >= 0 && target < rowCount ? target : -1;
     }
 
     static Action action(Support support, boolean down) {
-        if (!support.enabled) return Action.NONE;
+        if (!support.enabled || !support.verticalContainer()) return Action.NONE;
         if (down) return support.down ? Action.DOWN : support.forward ? Action.FORWARD : Action.NONE;
         return support.up ? Action.UP : support.backward ? Action.BACKWARD : Action.NONE;
     }

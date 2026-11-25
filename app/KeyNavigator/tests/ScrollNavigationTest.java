@@ -19,6 +19,31 @@ public final class ScrollNavigationTest {
         ScrollNavigation.Support disabled = new ScrollNavigation.Support(true,false,true,true,true,true,false);
         ScrollNavigation.Support empty = new ScrollNavigation.Support(true,true,false,false,false,false,false);
         ScrollNavigation.Support nonScrollingCollection = new ScrollNavigation.Support(false,true,false,false,false,false,false);
+        check(ScrollNavigation.horizontalPager("se.bankgirot.swish", "se.bankgirot.swish:id/view_pager", "x.bLm"),
+                "Swish horizontal pager survives obfuscated class names");
+        check(ScrollNavigation.horizontalPager("any.app", null, "androidx.viewpager.widget.ViewPager"),
+                "AndroidX legacy pager is horizontal");
+        check(ScrollNavigation.horizontalPager("any.app", null, "android.support.v4.view.ViewPager"),
+                "Support-library legacy pager is horizontal");
+        check(ScrollNavigation.horizontalPager("any.app", null, "com.android.internal.widget.ViewPager"),
+                "Framework legacy pager is horizontal");
+        check(!ScrollNavigation.horizontalPager("any.app", "any.app:id/view_pager", "unknown"),
+                "A resource name alone does not determine another app's orientation");
+        check(!ScrollNavigation.horizontalPager("se.bankgirot.swish", "se.bankgirot.swish:id/coordinator_layout_history_overview", "android.widget.ScrollView"),
+                "Swish history's vertical list remains scrollable");
+        check(!ScrollNavigation.horizontalPager("any.app", null, "androidx.viewpager2.widget.ViewPager2"),
+                "ViewPager2 may be vertical; require actual axis evidence");
+        check(!ScrollNavigation.horizontalPager(null, null, null), "Missing metadata does not classify a pager");
+        check(ScrollNavigation.nearest(Arrays.asList(plain,horizontal,plain)) == -1,
+                "Swish toolbar has no vertical owner through its tab pager");
+        check(ScrollNavigation.nearest(Arrays.asList(horizontal,list,plain)) == 1,
+                "Vertical list inside a tab still owns Up/Down");
+        check(ScrollNavigation.action(horizontal,true) == ScrollNavigation.Action.NONE,
+                "Down must never dispatch FORWARD to a horizontal pager");
+        check(ScrollNavigation.action(horizontal,false) == ScrollNavigation.Action.NONE,
+                "Up must never dispatch BACKWARD to a horizontal pager");
+        check(ScrollNavigation.action(new ScrollNavigation.Support(true,true,true,true,true,true,true),true)
+                == ScrollNavigation.Action.DOWN, "Explicit vertical actions override a horizontal hint");
         check(ScrollNavigation.nearest(Collections.emptyList()) == -1, "No ancestors");
         check(ScrollNavigation.nearest(Arrays.asList(plain,plain)) == -1, "Plain containers do not scroll");
         check(ScrollNavigation.nearest(Arrays.asList(plain,list,plain)) == 1, "List containing the highlighted child");
@@ -48,14 +73,23 @@ public final class ScrollNavigationTest {
                 new SpatialNavigation.Box(0,58,100,98)) == 1, "Anchor to a nearby newly visible row");
         check(SpatialNavigation.closest(Collections.emptyList(),new SpatialNavigation.Box(0,0,1,1)) == -1,
                 "No fallback target in missing list");
-        check(ScrollNavigation.adjacentRow(10,14,100,true) == 11, "Down jumps one row with overlap");
-        check(ScrollNavigation.adjacentRow(10,14,100,false) == 9, "Up jumps one row");
-        check(ScrollNavigation.adjacentRow(0,4,100,false) == -1, "Top boundary falls back");
-        check(ScrollNavigation.adjacentRow(-1,4,100,true) == -1, "Missing row metadata");
-        check(ScrollNavigation.adjacentRow(4,4,100,true) == -1, "Single tall row keeps ordinary scrolling");
-        check(ScrollNavigation.adjacentRow(5,4,100,true) == -1, "Reverse row order falls back");
-        check(ScrollNavigation.adjacentRow(0,4,4,true) == -1, "Invalid row count falls back");
-        check(ScrollNavigation.adjacentRow(98,99,100,true) == 99, "Last target is in range");
+        check(!ScrollNavigation.completeRowHeight(37,53), "Clipped Gmail header is not a complete row");
+        check(!ScrollNavigation.completeRowHeight(36,136), "Clipped leading email is not a complete row");
+        check(ScrollNavigation.completeRowHeight(136,136), "Fully visible email is complete");
+        check(!ScrollNavigation.completeRowHeight(136,0), "Unknown full height falls back");
+        check(ScrollNavigation.adjacentRow(0,4,1,100,true) == 2, "Skip clipped header to advance past first complete email");
+        check(ScrollNavigation.adjacentRow(4,8,5,100,true) == 6, "Repeated Down advances past clipped leading email");
+        check(ScrollNavigation.adjacentRow(4,8,5,100,false) == 3, "Up still advances before the first partial row");
+        check(ScrollNavigation.adjacentRow(4,8,-1,100,true) == -1, "No complete row uses ordinary scrolling");
+        check(ScrollNavigation.adjacentRow(4,8,9,100,true) == -1, "Invalid complete-row index falls back");
+        check(ScrollNavigation.adjacentRow(10,14,10,100,true) == 11, "Down jumps one row with overlap");
+        check(ScrollNavigation.adjacentRow(10,14,10,100,false) == 9, "Up jumps one row");
+        check(ScrollNavigation.adjacentRow(0,4,0,100,false) == -1, "Top boundary falls back");
+        check(ScrollNavigation.adjacentRow(-1,4,-1,100,true) == -1, "Missing row metadata");
+        check(ScrollNavigation.adjacentRow(4,4,4,100,true) == -1, "Single tall row keeps ordinary scrolling");
+        check(ScrollNavigation.adjacentRow(5,4,5,100,true) == -1, "Reverse row order falls back");
+        check(ScrollNavigation.adjacentRow(0,4,0,4,true) == -1, "Invalid row count falls back");
+        check(ScrollNavigation.adjacentRow(98,99,98,100,true) == 99, "Last target is in range");
         ScrollNavigation.Settling settling = new ScrollNavigation.Settling(1000, false);
         check(settling.remaining(1000) == 300, "No-event fallback is bounded");
         settling.onEvent(1100, 1100);

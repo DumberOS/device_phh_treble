@@ -13,6 +13,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 public final class ScrollProbe extends Instrumentation {
     private String packageName, targetId;
     private int action;
+    private Bundle actionArguments;
     private boolean verticalCollection;
     private int count;
     private final StringBuilder output = new StringBuilder();
@@ -26,6 +27,13 @@ public final class ScrollProbe extends Instrumentation {
                 : "backward".equals(direction) ? AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
                 : "up".equals(direction) ? AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP.getId()
                 : AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN.getId();
+        if (args.containsKey("row")) {
+            action = AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_TO_POSITION.getId();
+            actionArguments = new Bundle();
+            actionArguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_ROW_INT,
+                    Integer.parseInt(args.getString("row")));
+            actionArguments.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_COLUMN_INT, 0);
+        }
         start();
     }
     @Override public void onStart() {
@@ -57,7 +65,7 @@ public final class ScrollProbe extends Instrumentation {
                 if (target == null) throw new IllegalStateException("Scroll target absent");
                 try {
                     output.append("BEFORE\n"); read(target, 0);
-                    output.append("accepted=").append(target.performAction(action)).append('\n');
+                    output.append("accepted=").append(target.performAction(action, actionArguments)).append('\n');
                     SystemClock.sleep(1200);
                     target.refresh();
                     output.append("AFTER\n"); count = 0; read(target, 0);
@@ -89,8 +97,11 @@ public final class ScrollProbe extends Instrumentation {
     }
     private void read(AccessibilityNodeInfo node, int depth) {
         Rect bounds = new Rect(); node.getBoundsInScreen(bounds);
+        Rect parentBounds = new Rect(); node.getBoundsInParent(parentBounds);
+        AccessibilityNodeInfo.CollectionItemInfo item = node.getCollectionItemInfo();
+        output.append("row=").append(item == null ? -1 : item.getRowIndex()).append(' ');
         output.append("id=").append(node.getViewIdResourceName()).append(" bounds=").append(bounds.toShortString())
-                .append(" actions=");
+                .append(" parentBounds=").append(parentBounds.toShortString()).append(" actions=");
         for (AccessibilityNodeInfo.AccessibilityAction action : node.getActionList()) output.append(action.getId()).append(',');
         output.append('\n');
         if (depth == 0) for (int i = 0; i < node.getChildCount(); i++) {

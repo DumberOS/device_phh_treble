@@ -263,6 +263,8 @@ final class AppNavigator {
         String className = node.getClassName() == null ? "" : node.getClassName().toString();
         AccessibilityNodeInfo.CollectionInfo collection = node.getCollectionInfo();
         boolean horizontal = "android.widget.HorizontalScrollView".equals(className)
+                || (!up && !down && ScrollNavigation.horizontalPager(
+                        String.valueOf(node.getPackageName()), node.getViewIdResourceName(), className))
                 || (!up && !down && collection != null && collection.getRowCount() == 1
                         && collection.getColumnCount() > 1)
                 || (!up && !down && (actions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_LEFT)
@@ -375,7 +377,7 @@ final class AppNavigator {
         if (collection == null || collection.getColumnCount() != 1) return -1;
         Rect viewport = new Rect();
         container.getBoundsInScreen(viewport);
-        int first = -1, last = -1, previousTop = Integer.MIN_VALUE;
+        int first = -1, last = -1, firstComplete = -1, previousTop = Integer.MIN_VALUE;
         for (int i = 0; i < container.getChildCount(); i++) {
             AccessibilityNodeInfo child = container.getChild(i);
             if (child == null) continue;
@@ -389,11 +391,15 @@ final class AppNavigator {
                 if (item == null || item.getRowSpan() != 1 || item.getRowIndex() <= last
                         || bounds.top < previousTop) return -1;
                 if (first < 0) first = item.getRowIndex();
+                Rect parentBounds = new Rect();
+                child.getBoundsInParent(parentBounds);
+                if (firstComplete < 0 && ScrollNavigation.completeRowHeight(
+                        bounds.height(), parentBounds.height())) firstComplete = item.getRowIndex();
                 last = item.getRowIndex();
                 previousTop = bounds.top;
             } finally { child.recycle(); }
         }
-        return ScrollNavigation.adjacentRow(first, last, collection.getRowCount(), down);
+        return ScrollNavigation.adjacentRow(first, last, firstComplete, collection.getRowCount(), down);
     }
 
     private final Runnable settleScroll = this::finishScroll;

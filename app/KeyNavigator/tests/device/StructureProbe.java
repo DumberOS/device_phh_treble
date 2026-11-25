@@ -55,6 +55,7 @@ public final class StructureProbe extends Instrumentation {
         if (++count > 600 || depth > 60) throw new IllegalStateException("Tree limit");
         if (!packageName.equals(String.valueOf(node.getPackageName()))) return;
         Rect bounds = new Rect(); node.getBoundsInScreen(bounds);
+        Rect parentBounds = new Rect(); node.getBoundsInParent(parentBounds);
         AccessibilityNodeInfo.CollectionItemInfo item = node.getCollectionItemInfo();
         AccessibilityNodeInfo.CollectionInfo collection = node.getCollectionInfo();
         output.append("visible=").append(node.isVisibleToUser())
@@ -63,6 +64,7 @@ public final class StructureProbe extends Instrumentation {
                 .append(" cols=").append(collection == null ? -1 : collection.getColumnCount()).append(' ');
         output.append("depth=").append(depth).append(" class=").append(node.getClassName())
                 .append(" id=").append(node.getViewIdResourceName()).append(" bounds=").append(bounds.toShortString())
+                .append(" parentBounds=").append(parentBounds.toShortString())
                 .append(" scrollable=").append(node.isScrollable()).append(" enabled=").append(node.isEnabled())
                 .append(" clickable=").append(node.isClickable()).append(" actions=");
         for (AccessibilityNodeInfo.AccessibilityAction action : node.getActionList()) output.append(action.getId()).append(',');
